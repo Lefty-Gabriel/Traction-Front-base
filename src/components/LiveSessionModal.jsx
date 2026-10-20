@@ -7,17 +7,33 @@ import {
 export function LiveSessionModal({ 
   isOpen, 
   onClose, 
-  liveClass 
+  liveClass,
+  onJoin,
 }) {
-  if (!isOpen || !liveClass) return null;
-
   const [handRaised, setHandRaised] = useState(false);
+  const [connection, setConnection] = useState(null);
+  const [joinError, setJoinError] = useState('');
+  const [isJoining, setIsJoining] = useState(false);
   const [messages, setMessages] = useState([
     { id: 1, user: 'Mateo C.', time: '18:31', text: '¡Excelente ver a todos! Preparado con mi pipeline de 12 cuentas.' },
     { id: 2, user: 'Valeria G.', time: '18:32', text: 'Sofía, ¿vamos a ver cómo estructurar el follow-up por WhatsApp también?' },
     { id: 3, user: 'Sofía Valenzuela (Mentor)', time: '18:33', isMentor: true, text: '¡Bienvenidos! Sí Valeria, al final dedicaremos 20 min a cadencias de WhatsApp B2B.' }
   ]);
   const [inputText, setInputText] = useState('');
+
+  if (!isOpen || !liveClass) return null;
+
+  const handleJoin = async () => {
+    setIsJoining(true);
+    setJoinError('');
+    try {
+      setConnection(await onJoin(liveClass));
+    } catch (error) {
+      setJoinError(error.message || 'No se pudo entrar a la sala.');
+    } finally {
+      setIsJoining(false);
+    }
+  };
 
   const handleSendMessage = (e) => {
     e.preventDefault();
@@ -44,7 +60,7 @@ export function LiveSessionModal({
         {/* Header de la Sala en Vivo */}
         <div style={{
           padding: '16px 24px',
-          background: 'var(--bg-deep)',
+          backgroundColor: 'var(--bg-surface-elevated)',
           borderBottom: '1px solid var(--border-subtle)',
           display: 'flex',
           alignItems: 'center',
@@ -57,7 +73,7 @@ export function LiveSessionModal({
               <span>SALA EN VIVO ACTIVA</span>
             </span>
             <div>
-              <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#FFFFFF' }}>{liveClass.title}</h3>
+              <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-main)' }}>{liveClass.title}</h3>
               <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                 Mentor: <strong style={{ color: 'var(--text-main)' }}>{liveClass.mentorName}</strong> • {liveClass.duration}
               </p>
@@ -65,16 +81,16 @@ export function LiveSessionModal({
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <a 
-              href={liveClass.joinUrl} 
-              target="_blank" 
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={handleJoin}
               className="btn btn-secondary btn-sm"
               style={{ gap: '6px' }}
+              disabled={isJoining}
             >
-              <span>Abrir en Zoom Oficial</span>
+              <span>{isJoining ? 'Conectando…' : connection ? 'Sala autorizada' : 'Entrar a la sala'}</span>
               <ExternalLink size={13} />
-            </a>
+            </button>
             <button 
               onClick={onClose}
               style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
@@ -87,40 +103,41 @@ export function LiveSessionModal({
         {/* Contenido Principal: Grid Video + Chat */}
         <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 340px', minHeight: 0 }}>
           {/* Lado Izquierdo: Transmisión en Vivo */}
-          <div style={{ background: '#030508', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+          <div style={{ background: '#000000', display: 'flex', flexDirection: 'column', position: 'relative' }}>
             <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {/* Video en vivo con poster de alta calidad */}
-              <video 
-                src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" 
-                controls
-                autoPlay
-                muted
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              />
+              <div style={{ color: '#fff', textAlign: 'center', padding: 32 }}>
+                <VideoIcon size={48} style={{ marginBottom: 12, opacity: 0.8 }} />
+                <h3>{connection ? 'Acceso a LiveKit generado' : 'Sala de transmisión'}</h3>
+                <p style={{ marginTop: 8, color: '#CBD5E1', maxWidth: 520 }}>
+                  {connection
+                    ? `Sala ${connection.room}. El token real fue emitido por el backend.`
+                    : 'Pulsa “Entrar a la sala” para solicitar acceso seguro al backend.'}
+                </p>
+                {joinError && <p style={{ marginTop: 12, color: '#FCA5A5' }}>{joinError}</p>}
+              </div>
               
               {/* Badge superpuesto en el video */}
               <div style={{
                 position: 'absolute',
                 top: '18px',
                 left: '18px',
-                background: 'rgba(0, 0, 0, 0.75)',
-                backdropFilter: 'blur(8px)',
+                background: 'rgba(0, 0, 0, 0.8)',
                 padding: '6px 14px',
                 borderRadius: 'var(--radius-full)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
+                border: '1px solid rgba(255, 255, 255, 0.15)'
               }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#EF4444' }} />
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#FFF' }}>142 Asistentes Conectados</span>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--brand-celeste)' }} />
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#FFFFFF' }}>{liveClass.status === 'live' ? 'Sesión en vivo' : liveClass.badge}</span>
               </div>
             </div>
 
             {/* Barra de Controles de Sala */}
             <div style={{
               padding: '14px 20px',
-              background: 'var(--bg-surface)',
+              backgroundColor: 'var(--bg-surface)',
               borderTop: '1px solid var(--border-subtle)',
               display: 'flex',
               alignItems: 'center',
@@ -154,7 +171,7 @@ export function LiveSessionModal({
 
           {/* Lado Derecho: Chat en Vivo con Alumnos & Mentores */}
           <div style={{
-            background: 'var(--bg-surface)',
+            backgroundColor: 'var(--bg-surface)',
             borderLeft: '1px solid var(--border-subtle)',
             display: 'flex',
             flexDirection: 'column'
@@ -166,16 +183,16 @@ export function LiveSessionModal({
               alignItems: 'center',
               gap: '8px'
             }}>
-              <MessageSquare size={16} style={{ color: 'var(--emerald-400)' }} />
-              <span style={{ fontWeight: 700, fontSize: '13px' }}>Chat en Vivo con Alumnos</span>
+              <MessageSquare size={16} style={{ color: 'var(--brand-celeste)' }} />
+              <span style={{ fontWeight: 700, fontSize: '13px', color: 'var(--text-main)' }}>Chat en Vivo con Alumnos</span>
             </div>
 
             {/* Mensajes del chat */}
             <div style={{ flex: 1, padding: '16px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {messages.map((m) => (
                 <div key={m.id} style={{
-                  background: m.isMentor ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-deep)',
-                  border: m.isMentor ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid var(--border-subtle)',
+                  backgroundColor: m.isMentor ? 'var(--brand-celeste-subtle)' : 'var(--bg-surface-elevated)',
+                  border: m.isMentor ? '1px solid var(--brand-celeste-border)' : '1px solid var(--border-subtle)',
                   borderRadius: 'var(--radius-md)',
                   padding: '10px 12px'
                 }}>
@@ -183,7 +200,7 @@ export function LiveSessionModal({
                     <span style={{
                       fontSize: '12px',
                       fontWeight: 700,
-                      color: m.isMentor ? 'var(--emerald-400)' : 'var(--text-main)'
+                      color: m.isMentor ? 'var(--brand-celeste)' : 'var(--text-main)'
                     }}>
                       {m.user}
                     </span>
@@ -202,7 +219,7 @@ export function LiveSessionModal({
               borderTop: '1px solid var(--border-subtle)',
               display: 'flex',
               gap: '8px',
-              background: 'var(--bg-deep)'
+              backgroundColor: 'var(--bg-surface-elevated)'
             }}>
               <input 
                 type="text" 
@@ -211,11 +228,11 @@ export function LiveSessionModal({
                 onChange={(e) => setInputText(e.target.value)}
                 style={{
                   flex: 1,
-                  background: 'var(--bg-surface)',
+                  backgroundColor: 'var(--bg-surface)',
                   border: '1px solid var(--border-subtle)',
                   borderRadius: 'var(--radius-sm)',
                   padding: '8px 12px',
-                  color: '#FFF',
+                  color: 'var(--text-main)',
                   fontSize: '12px',
                   outline: 'none'
                 }}
@@ -230,3 +247,5 @@ export function LiveSessionModal({
     </div>
   );
 }
+
+export default LiveSessionModal;

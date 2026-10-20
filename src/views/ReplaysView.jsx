@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Film, Play, Search, Clock, Users, ArrowLeft, Eye, Download, Sparkles } from 'lucide-react';
 
-export function ReplaysView({ replays, onNavigate }) {
+export function ReplaysView({ replays, onNavigate, onPlay }) {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeReplayModal, setActiveReplayModal] = useState(null);
+  const [playbackError, setPlaybackError] = useState('');
 
   const categories = ['all', 'Ventas B2B', 'Finanzas', 'Growth & Producto', 'Liderazgo'];
 
@@ -26,7 +27,7 @@ export function ReplaysView({ replays, onNavigate }) {
               <span>Videoteca Bajo Demanda</span>
             </span>
           </div>
-          <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#FFFFFF' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-main)' }}>
             Grabaciones de Clases en Vivo (Replays)
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '4px' }}>
@@ -43,11 +44,11 @@ export function ReplaysView({ replays, onNavigate }) {
             onChange={(e) => setSearch(e.target.value)}
             style={{
               width: '100%',
-              padding: '10px 14px',
+              padding: '9px 14px',
               borderRadius: 'var(--radius-md)',
-              background: 'var(--bg-surface)',
+              backgroundColor: 'var(--bg-surface)',
               border: '1px solid var(--border-subtle)',
-              color: '#FFF',
+              color: 'var(--text-main)',
               fontSize: '13px',
               outline: 'none'
             }}
@@ -64,9 +65,9 @@ export function ReplaysView({ replays, onNavigate }) {
             style={{
               padding: '8px 16px',
               borderRadius: 'var(--radius-full)',
-              border: selectedCategory === cat ? '1px solid var(--gold-400)' : '1px solid var(--border-subtle)',
-              background: selectedCategory === cat ? 'rgba(245, 158, 11, 0.15)' : 'var(--bg-surface)',
-              color: selectedCategory === cat ? 'var(--gold-300)' : 'var(--text-muted)',
+              border: selectedCategory === cat ? '1px solid var(--brand-celeste)' : '1px solid var(--border-subtle)',
+              backgroundColor: selectedCategory === cat ? 'var(--brand-celeste-subtle)' : 'var(--bg-surface)',
+              color: selectedCategory === cat ? 'var(--brand-celeste)' : 'var(--text-muted)',
               fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer',
@@ -84,7 +85,15 @@ export function ReplaysView({ replays, onNavigate }) {
           <div 
             key={replay.id}
             className="card card-interactive"
-            onClick={() => setActiveReplayModal(replay)}
+            onClick={async () => {
+              setPlaybackError('');
+              try {
+                const playback = await onPlay(replay);
+                setActiveReplayModal({ ...replay, playbackUrl: playback.url });
+              } catch (error) {
+                setPlaybackError(error.message || 'No se pudo reproducir el video.');
+              }
+            }}
             style={{ display: 'flex', flexDirection: 'column' }}
           >
             {/* Thumbnail con botón Play superpuesto */}
@@ -93,7 +102,8 @@ export function ReplaysView({ replays, onNavigate }) {
               height: '180px',
               borderRadius: 'var(--radius-md)',
               overflow: 'hidden',
-              marginBottom: '16px'
+              marginBottom: '16px',
+              border: '1px solid var(--border-subtle)'
             }}>
               <img 
                 src={replay.thumbnail} 
@@ -103,23 +113,23 @@ export function ReplaysView({ replays, onNavigate }) {
               <div style={{
                 position: 'absolute',
                 inset: 0,
-                background: 'rgba(9, 13, 22, 0.5)',
+                background: 'rgba(9, 13, 22, 0.45)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
                 <div style={{
-                  width: '52px',
-                  height: '52px',
+                  width: '48px',
+                  height: '48px',
                   borderRadius: '50%',
-                  background: 'rgba(245, 158, 11, 0.9)',
-                  color: '#1E1000',
+                  backgroundColor: 'var(--brand-celeste)',
+                  color: '#FFFFFF',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: 'var(--glow-gold)'
+                  boxShadow: 'var(--shadow-sm)'
                 }}>
-                  <Play size={22} fill="currentColor" style={{ marginLeft: '3px' }} />
+                  <Play size={20} fill="currentColor" style={{ marginLeft: '3px' }} />
                 </div>
               </div>
 
@@ -131,12 +141,12 @@ export function ReplaysView({ replays, onNavigate }) {
                 position: 'absolute',
                 bottom: '10px',
                 right: '10px',
-                background: 'rgba(0, 0, 0, 0.8)',
+                background: 'rgba(0, 0, 0, 0.85)',
                 padding: '3px 8px',
                 borderRadius: '4px',
                 fontSize: '11px',
                 fontWeight: 600,
-                color: '#FFF'
+                color: '#FFFFFF'
               }}>
                 {replay.duration}
               </span>
@@ -147,7 +157,7 @@ export function ReplaysView({ replays, onNavigate }) {
               <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '4px' }}>
                 Grabado el {replay.date} • <Eye size={12} style={{ display: 'inline', verticalAlign: 'middle' }} /> {replay.views} vistas
               </div>
-              <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#FFFFFF', marginBottom: '8px', lineHeight: '1.3' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-main)', marginBottom: '8px', lineHeight: '1.3' }}>
                 {replay.title}
               </h3>
               <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.4', marginBottom: '16px' }}>
@@ -158,7 +168,7 @@ export function ReplaysView({ replays, onNavigate }) {
                 <span style={{ fontSize: '12px', color: 'var(--text-main)', fontWeight: 600 }}>
                   Mentor: {replay.mentor}
                 </span>
-                <span style={{ fontSize: '12px', color: 'var(--gold-400)', fontWeight: 700 }}>
+                <span style={{ fontSize: '12px', color: 'var(--brand-celeste)', fontWeight: 700 }}>
                   Ver Grabación →
                 </span>
               </div>
@@ -166,6 +176,12 @@ export function ReplaysView({ replays, onNavigate }) {
           </div>
         ))}
       </div>
+
+      {playbackError && (
+        <div role="alert" style={{ padding: '12px 16px', borderRadius: 10, color: '#991B1B', background: '#FEF2F2', border: '1px solid #FECACA' }}>
+          {playbackError}
+        </div>
+      )}
 
       {/* Modal de Reproducción del Replay */}
       {activeReplayModal && (
@@ -177,7 +193,7 @@ export function ReplaysView({ replays, onNavigate }) {
           >
             <div style={{
               padding: '16px 24px',
-              background: 'var(--bg-deep)',
+              backgroundColor: 'var(--bg-surface-elevated)',
               borderBottom: '1px solid var(--border-subtle)',
               display: 'flex',
               justifyContent: 'space-between',
@@ -185,7 +201,7 @@ export function ReplaysView({ replays, onNavigate }) {
             }}>
               <div>
                 <span className="badge badge-amber" style={{ marginBottom: '4px' }}>Replay Grabado</span>
-                <h3 style={{ fontSize: '17px', fontWeight: 800 }}>{activeReplayModal.title}</h3>
+                <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-main)' }}>{activeReplayModal.title}</h3>
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                   Mentor: {activeReplayModal.mentor} • Duración: {activeReplayModal.duration}
                 </div>
@@ -198,16 +214,16 @@ export function ReplaysView({ replays, onNavigate }) {
               </button>
             </div>
 
-            <div style={{ aspectRatio: '16/9', background: '#000' }}>
+            <div style={{ aspectRatio: '16/9', background: '#000000' }}>
               <video 
-                src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+                src={activeReplayModal.playbackUrl}
                 controls
                 autoPlay
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
             </div>
 
-            <div style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-surface)' }}>
+            <div style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-surface)' }}>
               <p style={{ fontSize: '13px', color: 'var(--text-muted)', maxWidth: '500px' }}>
                 {activeReplayModal.description}
               </p>
@@ -225,3 +241,5 @@ export function ReplaysView({ replays, onNavigate }) {
     </div>
   );
 }
+
+export default ReplaysView;

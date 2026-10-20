@@ -33,7 +33,7 @@ export function DashboardView({
   const activeCourse = courses[0]; // Active course with progress
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
       {/* Saludo y Métricas de Alto Impacto */}
       <div style={{
         display: 'flex',
@@ -52,7 +52,7 @@ export function DashboardView({
               Periodo Q4 • Enfoque en Escala
             </span>
           </div>
-          <h1 style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.02em', color: '#FFFFFF' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-main)' }}>
             Hola, {user.name.split(' ')[0]} 👋
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '15px', marginTop: '4px' }}>
@@ -63,8 +63,8 @@ export function DashboardView({
         {/* Tarjetas de Métricas Ejecutivas */}
         <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
           <div className="stat-card">
-            <div className="stat-icon-wrapper" style={{ background: 'rgba(16, 185, 129, 0.15)', color: 'var(--emerald-400)' }}>
-              <BookOpen size={22} />
+            <div className="stat-icon-wrapper">
+              <BookOpen size={20} />
             </div>
             <div>
               <div className="stat-value">{user.stats.coursesInProgress}</div>
@@ -73,8 +73,8 @@ export function DashboardView({
           </div>
 
           <div className="stat-card">
-            <div className="stat-icon-wrapper" style={{ background: 'rgba(6, 182, 212, 0.15)', color: 'var(--cyan-400)' }}>
-              <CheckCircle2 size={22} />
+            <div className="stat-icon-wrapper" style={{ backgroundColor: 'var(--bg-surface-elevated)', color: 'var(--brand-celeste)', borderColor: 'var(--border-subtle)' }}>
+              <CheckCircle2 size={20} />
             </div>
             <div>
               <div className="stat-value">{user.stats.completedLessons}</div>
@@ -83,8 +83,8 @@ export function DashboardView({
           </div>
 
           <div className="stat-card">
-            <div className="stat-icon-wrapper" style={{ background: 'rgba(245, 158, 11, 0.15)', color: 'var(--gold-400)' }}>
-              <Clock size={22} />
+            <div className="stat-icon-wrapper">
+              <Clock size={20} />
             </div>
             <div>
               <div className="stat-value">{user.stats.totalHoursWatched}h</div>
@@ -114,7 +114,7 @@ export function DashboardView({
                 </span>
               </div>
 
-              <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#FFFFFF', lineHeight: '1.3' }}>
+              <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-main)', lineHeight: '1.3' }}>
                 {featuredLive.title}
               </h2>
               <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '8px', lineHeight: '1.5' }}>
@@ -127,11 +127,11 @@ export function DashboardView({
                   <img 
                     src={featuredLive.mentorAvatar} 
                     alt={featuredLive.mentorName} 
-                    style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid var(--emerald-500)' }} 
+                    style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid var(--brand-celeste)' }} 
                   />
                   <div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#FFFFFF' }}>{featuredLive.mentorName}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--emerald-400)' }}>Head of Sales B2B</div>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>{featuredLive.mentorName}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--brand-celeste)', fontWeight: 600 }}>Head of Sales B2B</div>
                   </div>
                 </div>
 
@@ -146,8 +146,8 @@ export function DashboardView({
 
             {/* Contador y Botones de Acción */}
             <div style={{
-              background: 'rgba(9, 13, 22, 0.7)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              backgroundColor: 'var(--bg-surface-elevated)',
+              border: '1px solid var(--border-medium)',
               borderRadius: 'var(--radius-md)',
               padding: '24px',
               display: 'flex',
@@ -163,24 +163,24 @@ export function DashboardView({
               {/* Ticking Numbers */}
               <div style={{ display: 'flex', gap: '14px' }}>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '32px', fontWeight: 800, color: '#FFFFFF', fontVariantNumeric: 'tabular-nums' }}>
+                  <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-main)', fontVariantNumeric: 'tabular-nums' }}>
                     {String(timeLeft.hours).padStart(2, '0')}
                   </div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Horas</div>
+                  <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 600 }}>Horas</div>
                 </div>
-                <div style={{ fontSize: '28px', color: 'var(--emerald-400)', fontWeight: 800 }}>:</div>
+                <div style={{ fontSize: '28px', color: 'var(--brand-celeste)', fontWeight: 800 }}>:</div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '32px', fontWeight: 800, color: '#FFFFFF', fontVariantNumeric: 'tabular-nums' }}>
+                  <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-main)', fontVariantNumeric: 'tabular-nums' }}>
                     {String(timeLeft.minutes).padStart(2, '0')}
                   </div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Min</div>
+                  <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 600 }}>Min</div>
                 </div>
-                <div style={{ fontSize: '28px', color: 'var(--emerald-400)', fontWeight: 800 }}>:</div>
+                <div style={{ fontSize: '28px', color: 'var(--brand-celeste)', fontWeight: 800 }}>:</div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--emerald-400)', fontVariantNumeric: 'tabular-nums' }}>
+                  <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--brand-celeste)', fontVariantNumeric: 'tabular-nums' }}>
                     {String(timeLeft.seconds).padStart(2, '0')}
                   </div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Seg</div>
+                  <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 600 }}>Seg</div>
                 </div>
               </div>
 
@@ -206,21 +206,22 @@ export function DashboardView({
         </div>
       )}
 
-      {/* Sección Continuar Aprendiendo (Resume Card) */}
+      {/* Sección Continuar Aprendiendo (Resume Card - Sólida sin degradados) */}
       {activeCourse && (
         <div className="card" style={{
-          background: 'linear-gradient(135deg, var(--bg-surface), var(--bg-surface-elevated))',
-          borderColor: 'rgba(16, 185, 129, 0.25)',
+          backgroundColor: 'var(--bg-surface)',
+          borderColor: 'var(--brand-celeste-border)',
+          borderLeft: '4px solid var(--brand-celeste)',
           padding: '24px 28px'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Flame size={18} style={{ color: '#F97316' }} />
+              <Flame size={18} style={{ color: 'var(--brand-celeste)' }} />
               <span style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
                 Continuar donde te quedaste
               </span>
             </div>
-            <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--emerald-400)' }}>
+            <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--brand-celeste)' }}>
               {activeCourse.progressPercent}% Completado
             </span>
           </div>
@@ -232,10 +233,10 @@ export function DashboardView({
             alignItems: 'center'
           }}>
             <div>
-              <div style={{ fontSize: '12px', color: 'var(--emerald-400)', fontWeight: 600, marginBottom: '4px' }}>
+              <div style={{ fontSize: '12px', color: 'var(--brand-celeste)', fontWeight: 600, marginBottom: '4px' }}>
                 {activeCourse.category} • Módulo 3
               </div>
-              <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#FFFFFF', marginBottom: '6px' }}>
+              <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '6px' }}>
                 {activeCourse.title}
               </h3>
               <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
@@ -273,7 +274,7 @@ export function DashboardView({
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <div>
-            <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#FFFFFF' }}>Mis Programas de Negocio</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-main)' }}>Mis Programas de Negocio</h2>
             <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Formación estructurada por módulos y casos de estudio reales.</p>
           </div>
           <button 
@@ -294,28 +295,35 @@ export function DashboardView({
               style={{ display: 'flex', flexDirection: 'column' }}
               onClick={() => onSelectCourse(course)}
             >
-              {/* Imagen de portada */}
-              <div style={{ position: 'relative', height: '170px', borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: '16px' }}>
+              {/* Imagen de portada limpia (Sin degradados) */}
+              <div style={{ position: 'relative', height: '170px', borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: '16px', border: '1px solid var(--border-subtle)' }}>
                 <img 
                   src={course.thumbnail} 
                   alt={course.title}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                 />
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'linear-gradient(to top, rgba(10, 14, 23, 0.85) 0%, transparent 60%)'
-                }} />
 
                 <span className="badge badge-emerald" style={{ position: 'absolute', top: '12px', left: '12px' }}>
                   {course.category}
                 </span>
 
-                <div style={{ position: 'absolute', bottom: '12px', left: '12px', right: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '12px', color: '#FFF', fontWeight: 600 }}>
+                <div style={{
+                  position: 'absolute',
+                  bottom: '10px',
+                  left: '10px',
+                  right: '10px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  backgroundColor: 'rgba(15, 23, 42, 0.85)',
+                  backdropFilter: 'blur(4px)',
+                  padding: '4px 10px',
+                  borderRadius: 'var(--radius-sm)'
+                }}>
+                  <span style={{ fontSize: '12px', color: '#FFFFFF', fontWeight: 600 }}>
                     {course.estimatedHours}
                   </span>
-                  <span style={{ fontSize: '12px', color: 'var(--gold-300)', fontWeight: 700 }}>
+                  <span style={{ fontSize: '12px', color: '#FCD34D', fontWeight: 700 }}>
                     ★ {course.rating}
                   </span>
                 </div>
@@ -323,7 +331,7 @@ export function DashboardView({
 
               {/* Información del Curso */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#FFFFFF', marginBottom: '8px', lineHeight: '1.3' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-main)', marginBottom: '8px', lineHeight: '1.3' }}>
                   {course.title}
                 </h3>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.4', marginBottom: '16px' }}>
@@ -335,7 +343,7 @@ export function DashboardView({
                   <img 
                     src={course.mentorAvatar} 
                     alt={course.mentorName} 
-                    style={{ width: '28px', height: '28px', borderRadius: '50%' }}
+                    style={{ width: '28px', height: '28px', borderRadius: '50%', border: '1px solid var(--brand-celeste)' }}
                   />
                   <div style={{ fontSize: '12px' }}>
                     <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>{course.mentorName}</span>
@@ -347,7 +355,7 @@ export function DashboardView({
                 <div style={{ paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '6px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Progreso</span>
-                    <span style={{ color: 'var(--emerald-400)', fontWeight: 700 }}>{course.progressPercent}%</span>
+                    <span style={{ color: 'var(--brand-celeste)', fontWeight: 700 }}>{course.progressPercent}%</span>
                   </div>
                   <div className="progress-bar-container">
                     <div className="progress-bar-fill" style={{ width: `${course.progressPercent}%` }} />
@@ -364,7 +372,7 @@ export function DashboardView({
         {/* Herramientas & Plantillas */}
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-            <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#FFFFFF' }}>Plantillas y Modelos Descargables</h3>
+            <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--text-main)' }}>Plantillas y Modelos Descargables</h3>
             <button 
               className="btn btn-secondary btn-sm"
               onClick={() => onNavigate('library')}
@@ -380,15 +388,15 @@ export function DashboardView({
               justifyContent: 'space-between',
               padding: '12px 14px',
               borderRadius: 'var(--radius-md)',
-              background: 'var(--bg-deep)',
+              backgroundColor: 'var(--bg-surface-elevated)',
               border: '1px solid var(--border-subtle)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-sm)', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--emerald-400)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--brand-celeste-subtle)', color: 'var(--brand-celeste)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <FileSpreadsheet size={18} />
                 </div>
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#FFF' }}>Simulador Financiero Runway 36m</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main)' }}>Simulador Financiero Runway 36m</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>Excel • 3.4 MB • 1,420 descargas</div>
                 </div>
               </div>
@@ -407,15 +415,15 @@ export function DashboardView({
               justifyContent: 'space-between',
               padding: '12px 14px',
               borderRadius: 'var(--radius-md)',
-              background: 'var(--bg-deep)',
+              backgroundColor: 'var(--bg-surface-elevated)',
               border: '1px solid var(--border-subtle)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-sm)', background: 'rgba(6, 182, 212, 0.1)', color: 'var(--cyan-400)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--brand-celeste-subtle)', color: 'var(--brand-celeste)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <FileText size={18} />
                 </div>
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#FFF' }}>Playbook de Ventas & Scripts B2B</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main)' }}>Playbook de Ventas & Scripts B2B</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>Notion • Enlace directo • 980 descargas</div>
                 </div>
               </div>
@@ -433,7 +441,7 @@ export function DashboardView({
         {/* Novedades & Networking de Alumnos */}
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-            <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#FFFFFF' }}>Debates en la Comunidad</h3>
+            <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--text-main)' }}>Debates en la Comunidad</h3>
             <button 
               className="btn btn-secondary btn-sm"
               onClick={() => onNavigate('community')}
@@ -446,13 +454,13 @@ export function DashboardView({
             <div style={{
               padding: '12px 14px',
               borderRadius: 'var(--radius-md)',
-              background: 'var(--bg-deep)',
+              backgroundColor: 'var(--bg-surface-elevated)',
               border: '1px solid var(--border-subtle)'
             }}>
-              <div style={{ fontSize: '11px', color: 'var(--emerald-400)', fontWeight: 700, marginBottom: '4px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--brand-celeste)', fontWeight: 700, marginBottom: '4px' }}>
                 #VentasB2B • Debate Activo
               </div>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: '#FFF', lineHeight: '1.3' }}>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main)', lineHeight: '1.3' }}>
                 "¿Cómo están estructurando la comisión de su primer SDR en LatAm?"
               </div>
               <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '6px' }}>
@@ -463,13 +471,13 @@ export function DashboardView({
             <div style={{
               padding: '12px 14px',
               borderRadius: 'var(--radius-md)',
-              background: 'var(--bg-deep)',
+              backgroundColor: 'var(--bg-surface-elevated)',
               border: '1px solid var(--border-subtle)'
             }}>
-              <div style={{ fontSize: '11px', color: 'var(--gold-400)', fontWeight: 700, marginBottom: '4px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--brand-celeste)', fontWeight: 700, marginBottom: '4px' }}>
                 #CasosDeÉxito • Victoria de la semana
               </div>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: '#FFF', lineHeight: '1.3' }}>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main)', lineHeight: '1.3' }}>
                 "Redujimos el ciclo de ventas de 65 a 28 días aplicando el One-Pager"
               </div>
               <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '6px' }}>
@@ -482,3 +490,5 @@ export function DashboardView({
     </div>
   );
 }
+
+export default DashboardView;

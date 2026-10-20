@@ -11,10 +11,10 @@ export function MentorsView({ mentors, onSelectCourse, courses }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
           <span className="badge badge-emerald">
             <Users size={14} />
-            <span>Claustro Docente de Élite</span>
+            <span>Red de Mentores de Élite</span>
           </span>
         </div>
-        <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#FFFFFF' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-main)' }}>
           Mentores & Operadores de Negocios
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '4px' }}>
@@ -39,16 +39,16 @@ export function MentorsView({ mentors, onSelectCourse, courses }) {
                   height: '68px',
                   borderRadius: 'var(--radius-md)',
                   objectFit: 'cover',
-                  border: '2px solid var(--emerald-500)',
-                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.2)'
+                  border: '2px solid var(--brand-celeste)',
+                  boxShadow: 'var(--shadow-sm)'
                 }}
               />
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#FFFFFF' }}>{mentor.name}</h3>
-                  <ShieldCheck size={16} style={{ color: 'var(--emerald-400)' }} title="Mentor Verificado Traction" />
+                  <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-main)' }}>{mentor.name}</h3>
+                  <ShieldCheck size={16} style={{ color: 'var(--brand-celeste)' }} title="Mentor Verificado" />
                 </div>
-                <div style={{ fontSize: '13px', color: 'var(--emerald-400)', fontWeight: 600, marginTop: '2px' }}>
+                <div style={{ fontSize: '13px', color: 'var(--brand-celeste)', fontWeight: 600, marginTop: '2px' }}>
                   {mentor.role}
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>
@@ -70,7 +70,7 @@ export function MentorsView({ mentors, onSelectCourse, courses }) {
                     fontSize: '11px',
                     padding: '3px 8px',
                     borderRadius: 'var(--radius-sm)',
-                    background: 'var(--bg-deep)',
+                    background: 'var(--bg-surface-elevated)',
                     color: 'var(--text-muted)',
                     border: '1px solid var(--border-subtle)'
                   }}
@@ -90,7 +90,7 @@ export function MentorsView({ mentors, onSelectCourse, courses }) {
               alignItems: 'center'
             }}>
               <div style={{ display: 'flex', gap: '14px', fontSize: '12px', color: 'var(--text-dim)' }}>
-                <span>★ <strong style={{ color: 'var(--gold-400)' }}>{mentor.rating}</strong></span>
+                <span>★ <strong style={{ color: 'var(--brand-celeste)' }}>{mentor.rating}</strong></span>
                 <span>•</span>
                 <span>{mentor.studentsCount} alumnos</span>
               </div>
@@ -119,11 +119,11 @@ export function MentorsView({ mentors, onSelectCourse, courses }) {
               <img 
                 src={selectedMentor.avatar} 
                 alt={selectedMentor.name}
-                style={{ width: '70px', height: '70px', borderRadius: '50%', border: '2px solid var(--emerald-500)' }}
+                style={{ width: '70px', height: '70px', borderRadius: '50%', border: '2px solid var(--brand-celeste)' }}
               />
               <div>
                 <h2 style={{ fontSize: '20px', fontWeight: 800 }}>{selectedMentor.name}</h2>
-                <div style={{ color: 'var(--emerald-400)', fontWeight: 600, fontSize: '13px' }}>
+                <div style={{ color: 'var(--brand-celeste)', fontWeight: 600, fontSize: '13px' }}>
                   {selectedMentor.role} • {selectedMentor.company}
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
@@ -150,17 +150,17 @@ export function MentorsView({ mentors, onSelectCourse, courses }) {
                   <div style={{
                     padding: '12px 14px',
                     borderRadius: 'var(--radius-md)',
-                    background: 'var(--bg-deep)',
+                    background: 'var(--bg-surface-elevated)',
                     border: '1px solid var(--border-subtle)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center'
                   }}>
                     <div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#FFF' }}>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>
                         Machine de Ventas B2B & Prospección Outbound
                       </div>
-                      <div style={{ fontSize: '11px', color: 'var(--emerald-400)' }}>12 Lecciones • Programa Activo</div>
+                      <div style={{ fontSize: '11px', color: 'var(--brand-celeste)' }}>12 Lecciones • Programa Activo</div>
                     </div>
                     <button 
                       className="btn btn-primary btn-sm"
@@ -179,7 +179,7 @@ export function MentorsView({ mentors, onSelectCourse, courses }) {
             <div style={{
               padding: '16px 24px',
               borderTop: '1px solid var(--border-subtle)',
-              background: 'var(--bg-deep)',
+              background: 'var(--bg-surface-elevated)',
               display: 'flex',
               justifyContent: 'flex-end'
             }}>

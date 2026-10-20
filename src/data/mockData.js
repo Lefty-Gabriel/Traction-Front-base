@@ -1,11 +1,18 @@
-// Datos simulados de alta fidelidad para Traction Escuela de Negocios
+// Datos simulados de alta fidelidad para Comunidad del Intercambio
 
-export const currentUser = {
+export const studentUser = {
   id: "usr_001",
+  role: "student",
   name: "Alejandro Morales",
   title: "Fundador & CEO en ScaleTech",
-  email: "alejandro@scaletech.io",
-  avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80",
+  company: "ScaleTech LATAM",
+  email: "estudiante@traction.com",
+  phone: "+52 55 4892 1045",
+  location: "Ciudad de México, México",
+  linkedin: "https://linkedin.com/in/alejandro-morales",
+  website: "https://scaletech.io",
+  bio: "Emprendedor y profesional enfocado en el crecimiento empresarial, optimización de modelos de negocio y liderazgo de equipos de alto impacto. Participante activo en los programas y mentorías ejecutivas de la Comunidad del Intercambio.",
+  avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
   plan: "Scale Pass",
   planTier: "scale", // "growth" | "scale" | "executive"
   enrolledSince: "Enero 2026",
@@ -17,6 +24,113 @@ export const currentUser = {
     attendanceRate: "92%"
   }
 };
+
+export const mentorUser = {
+  id: "usr_mentor_01",
+  role: "mentor",
+  name: "Sofía Valenzuela",
+  title: "Head of Sales & Mentora Oficial",
+  email: "mentor@traction.com",
+  avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80",
+  plan: "Mentor Oficial",
+  planTier: "mentor",
+  company: "ScaleB2B Ventures",
+  stats: {
+    assignedCourses: 2,
+    upcomingLiveClasses: 2,
+    activeStudents: 348,
+    averageRating: "4.95 ★",
+    questionsPending: 3
+  }
+};
+
+export const adminUser = {
+  id: "usr_admin_01",
+  role: "admin",
+  name: "Dirección General & CMS",
+  title: "Administrador del Sistema",
+  email: "admin@traction.com",
+  avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=250&q=80",
+  plan: "Administrador Maestro",
+  planTier: "admin",
+  stats: {
+    totalStudents: 1480,
+    mrr: "$142,500",
+    totalCourses: 4,
+    activeLiveSessions: 3
+  }
+};
+
+export const demoAccounts = [
+  {
+    role: "student",
+    label: "Estudiante",
+    badge: "Alumno Activo",
+    name: "Alejandro Morales",
+    subtitle: "ScaleTech • Plan Scale Pass",
+    email: "estudiante@traction.com",
+    avatar: studentUser.avatar,
+    user: studentUser
+  },
+  {
+    role: "mentor",
+    label: "Mentor",
+    badge: "Claustro Oficial",
+    name: "Sofía Valenzuela",
+    subtitle: "ScaleB2B • Head of Sales",
+    email: "mentor@traction.com",
+    avatar: mentorUser.avatar,
+    user: mentorUser
+  },
+  {
+    role: "admin",
+    label: "Administrador",
+    badge: "Gestión CMS",
+    name: "Dirección General",
+    subtitle: "Control Total de Plataforma",
+    email: "admin@traction.com",
+    avatar: adminUser.avatar,
+    user: adminUser
+  }
+];
+
+export const mentorQuestions = [
+  {
+    id: "q_01",
+    studentName: "Mateo Carvajal",
+    studentCompany: "LogiFast",
+    studentAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80",
+    courseTitle: "Machine de Ventas B2B & Prospección Outbound",
+    lessonTitle: "Lección 3.1: Framework SPICED",
+    question: "Sofía, para un SaaS con ticket medio de $5,000/año, ¿recomiendas hacer la llamada de diagnóstico y la demo en una sola sesión o separadas?",
+    timeAgo: "Hace 2 horas",
+    status: "Pendiente"
+  },
+  {
+    id: "q_02",
+    studentName: "Valeria Gómez",
+    studentCompany: "FinPay LatAm",
+    studentAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+    courseTitle: "Machine de Ventas B2B & Prospección Outbound",
+    lessonTitle: "Lección 2.3: Cadencias de Prospección Multicanal",
+    question: "Encontramos que el open rate en cold email subió a 42%, pero las respuestas están en 3%. ¿Qué hook recomiendas en el segundo follow-up?",
+    timeAgo: "Hace 5 horas",
+    status: "Pendiente"
+  },
+  {
+    id: "q_03",
+    studentName: "Ignacio Silva",
+    studentCompany: "SaaSify",
+    studentAvatar: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=150&q=80",
+    courseTitle: "Estrategias de Negociación y Cierre de Grandes Cuentas",
+    lessonTitle: "Lección 1.4: Mapeo de Stakeholders y Champion",
+    question: "¿Cómo proceder cuando el Champion técnico apoya la compra pero el CFO bloquea por presupuesto de fin de año?",
+    timeAgo: "Ayer",
+    status: "Pendiente"
+  }
+];
+
+export const currentUser = studentUser;
 
 export const membershipPlans = [
   {

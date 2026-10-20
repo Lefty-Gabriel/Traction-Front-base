@@ -1,19 +1,16 @@
 import React, { useState } from 'react';
-import { 
-  FolderDown, Search, Download, FileSpreadsheet, FileText, 
-  ExternalLink, Star, CheckCircle, Sparkles, Filter 
-} from 'lucide-react';
+import { FolderDown, Search, FileSpreadsheet, FileText, Download, Star, Filter } from 'lucide-react';
 
 export function LibraryView({ resources }) {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  const categories = ['all', 'Finanzas', 'Ventas B2B', 'Liderazgo'];
+  const categories = ['all', 'Ventas & Outbound', 'Finanzas & Métricas', 'Operaciones & Procesos', 'Liderazgo & Talento'];
 
-  const filteredResources = resources.filter(res => {
-    const matchesSearch = res.title.toLowerCase().includes(search.toLowerCase()) ||
-                          res.description.toLowerCase().includes(search.toLowerCase());
-    const matchesCat = selectedCategory === 'all' || res.category === selectedCategory;
+  const filteredResources = resources.filter(r => {
+    const matchesSearch = r.title.toLowerCase().includes(search.toLowerCase()) ||
+                          r.description.toLowerCase().includes(search.toLowerCase());
+    const matchesCat = selectedCategory === 'all' || r.category === selectedCategory;
     return matchesSearch && matchesCat;
   });
 
@@ -28,7 +25,7 @@ export function LibraryView({ resources }) {
               <span>Caja de Herramientas Operativas</span>
             </span>
           </div>
-          <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#FFFFFF' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-main)' }}>
             Biblioteca de Recursos & Plantillas Ejecutivas
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '4px' }}>
@@ -45,11 +42,11 @@ export function LibraryView({ resources }) {
             onChange={(e) => setSearch(e.target.value)}
             style={{
               width: '100%',
-              padding: '10px 14px',
+              padding: '9px 14px',
               borderRadius: 'var(--radius-md)',
-              background: 'var(--bg-surface)',
+              backgroundColor: 'var(--bg-surface)',
               border: '1px solid var(--border-subtle)',
-              color: '#FFF',
+              color: 'var(--text-main)',
               fontSize: '13px',
               outline: 'none'
             }}
@@ -58,7 +55,7 @@ export function LibraryView({ resources }) {
       </div>
 
       {/* Categorías */}
-      <div style={{ display: 'flex', gap: '8px' }}>
+      <div style={{ display: 'flex', gap: '8px', overflowX: 'auto' }}>
         {categories.map((cat) => (
           <button
             key={cat}
@@ -66,12 +63,13 @@ export function LibraryView({ resources }) {
             style={{
               padding: '8px 16px',
               borderRadius: 'var(--radius-full)',
-              border: selectedCategory === cat ? '1px solid var(--emerald-500)' : '1px solid var(--border-subtle)',
-              background: selectedCategory === cat ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-surface)',
-              color: selectedCategory === cat ? 'var(--emerald-400)' : 'var(--text-muted)',
+              border: selectedCategory === cat ? '1px solid var(--brand-celeste)' : '1px solid var(--border-subtle)',
+              backgroundColor: selectedCategory === cat ? 'var(--brand-celeste-subtle)' : 'var(--bg-surface)',
+              color: selectedCategory === cat ? 'var(--brand-celeste)' : 'var(--text-muted)',
               fontSize: '13px',
               fontWeight: 600,
-              cursor: 'pointer'
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
             }}
           >
             {cat === 'all' ? 'Todos los Recursos' : cat}
@@ -91,16 +89,17 @@ export function LibraryView({ resources }) {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
                 <div style={{
-                  width: '44px',
-                  height: '44px',
+                  width: '42px',
+                  height: '42px',
                   borderRadius: 'var(--radius-md)',
-                  background: isExcel ? 'rgba(16, 185, 129, 0.15)' : 'rgba(6, 182, 212, 0.15)',
-                  color: isExcel ? 'var(--emerald-400)' : 'var(--cyan-400)',
+                  backgroundColor: isExcel ? 'var(--brand-celeste-subtle)' : 'var(--bg-surface-elevated)',
+                  color: isExcel ? 'var(--brand-celeste)' : 'var(--text-main)',
+                  border: '1px solid var(--border-subtle)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  {isExcel ? <FileSpreadsheet size={22} /> : <FileText size={22} />}
+                  {isExcel ? <FileSpreadsheet size={20} /> : <FileText size={20} />}
                 </div>
 
                 <span className="badge badge-emerald" style={{ fontSize: '11px' }}>
@@ -108,7 +107,7 @@ export function LibraryView({ resources }) {
                 </span>
               </div>
 
-              <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#FFFFFF', marginBottom: '8px', lineHeight: '1.3' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-main)', marginBottom: '8px', lineHeight: '1.3' }}>
                 {res.title}
               </h3>
               <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.4', marginBottom: '18px' }}>
@@ -134,3 +133,5 @@ export function LibraryView({ resources }) {
     </div>
   );
 }
+
+export default LibraryView;

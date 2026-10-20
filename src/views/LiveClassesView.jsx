@@ -40,7 +40,7 @@ export function LiveClassesView({
               <span>Interacción en Tiempo Real</span>
             </span>
           </div>
-          <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#FFFFFF' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-main)' }}>
             Clases en Vivo & Clínicas de Negocios
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '4px' }}>
@@ -69,9 +69,9 @@ export function LiveClassesView({
             style={{
               padding: '8px 16px',
               borderRadius: 'var(--radius-full)',
-              border: selectedCategory === cat.id ? '1px solid var(--emerald-500)' : '1px solid var(--border-subtle)',
-              background: selectedCategory === cat.id ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-surface)',
-              color: selectedCategory === cat.id ? 'var(--emerald-400)' : 'var(--text-muted)',
+              border: selectedCategory === cat.id ? '1px solid var(--brand-celeste)' : '1px solid var(--border-subtle)',
+              backgroundColor: selectedCategory === cat.id ? 'var(--brand-celeste-subtle)' : 'var(--bg-surface)',
+              color: selectedCategory === cat.id ? 'var(--brand-celeste)' : 'var(--text-muted)',
               fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer',
@@ -84,15 +84,23 @@ export function LiveClassesView({
         ))}
       </div>
 
-      {/* Grid de Clases en Vivo */}
+      {/* Grid de Clases en Vivo (Sólido, Sin Degradados) */}
+      {filteredClasses.length === 0 && (
+        <div className="card" style={{ textAlign: 'center', padding: '48px 24px' }}>
+          <Radio size={34} style={{ color: 'var(--brand-celeste)', marginBottom: 12 }} />
+          <h3 style={{ color: 'var(--text-main)', marginBottom: 6 }}>No hay sesiones programadas</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Las próximas clases asignadas a tus cursos aparecerán aquí.</p>
+        </div>
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         {filteredClasses.map((item) => (
           <div 
             key={item.id}
             className="card"
             style={{
-              background: item.isToday ? 'linear-gradient(135deg, rgba(16, 22, 35, 0.95), rgba(20, 30, 48, 0.9))' : 'var(--bg-surface)',
-              border: item.isToday ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-subtle)',
+              backgroundColor: item.isToday ? 'var(--brand-celeste-subtle)' : 'var(--bg-surface)',
+              border: item.isToday ? '1px solid var(--brand-celeste-border)' : '1px solid var(--border-subtle)',
+              borderLeft: item.isToday ? '4px solid var(--brand-celeste)' : '1px solid var(--border-subtle)',
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
               gap: '24px',
@@ -110,7 +118,7 @@ export function LiveClassesView({
                 </span>
               </div>
 
-              <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#FFFFFF', marginBottom: '8px', lineHeight: '1.3' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '8px', lineHeight: '1.3' }}>
                 {item.title}
               </h2>
               <p style={{ color: 'var(--text-muted)', fontSize: '14px', lineHeight: '1.5', marginBottom: '16px' }}>
@@ -122,18 +130,18 @@ export function LiveClassesView({
                 <img 
                   src={item.mentorAvatar} 
                   alt={item.mentorName} 
-                  style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid var(--emerald-500)' }} 
+                  style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid var(--brand-celeste)' }} 
                 />
                 <div>
-                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#FFFFFF' }}>{item.mentorName}</div>
-                  <div style={{ fontSize: '12px', color: 'var(--emerald-400)' }}>Mentor Oficial de Traction</div>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>{item.mentorName}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--brand-celeste)', fontWeight: 600 }}>Mentor Oficial</div>
                 </div>
               </div>
             </div>
 
             {/* Acciones y Materiales Previos */}
             <div style={{
-              background: 'var(--bg-deep)',
+              backgroundColor: 'var(--bg-surface-elevated)',
               border: '1px solid var(--border-subtle)',
               borderRadius: 'var(--radius-md)',
               padding: '20px',
@@ -143,7 +151,7 @@ export function LiveClassesView({
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: 600 }}>Asistencia esperada</span>
-                <span style={{ fontSize: '13px', color: 'var(--emerald-400)', fontWeight: 700 }}>
+                <span style={{ fontSize: '13px', color: 'var(--brand-celeste)', fontWeight: 700 }}>
                   <Users size={14} style={{ display: 'inline', marginRight: '4px' }} />
                   {item.attendeesCount} empresarios registrados
                 </span>
@@ -172,7 +180,7 @@ export function LiveClassesView({
               {/* Materiales preparatorios si existen */}
               {item.deliverables && item.deliverables.length > 0 && (
                 <div style={{ paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '6px' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '6px', fontWeight: 600 }}>
                     Material previo para la clase:
                   </div>
                   {item.deliverables.map((deliv, idx) => (
@@ -190,7 +198,7 @@ export function LiveClassesView({
                       onClick={() => alert(`Descargando: ${deliv.name}`)}
                     >
                       <span style={{ textDecoration: 'underline' }}>{deliv.name}</span>
-                      <Download size={12} style={{ color: 'var(--emerald-400)' }} />
+                      <Download size={12} style={{ color: 'var(--brand-celeste)' }} />
                     </div>
                   ))}
                 </div>
@@ -202,3 +210,5 @@ export function LiveClassesView({
     </div>
   );
 }
+
+export default LiveClassesView;

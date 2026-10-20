@@ -12,10 +12,10 @@ export function NotificationsModal({
 
   const getIcon = (type) => {
     switch(type) {
-      case 'live': return <Radio size={16} style={{ color: '#FB7185' }} />;
-      case 'resource': return <FolderDown size={16} style={{ color: '#34D399' }} />;
-      case 'replay': return <Film size={16} style={{ color: '#FBBF24' }} />;
-      default: return <Bell size={16} style={{ color: '#38BDF8' }} />;
+      case 'live': return <Radio size={16} style={{ color: 'var(--brand-celeste)' }} />;
+      case 'resource': return <FolderDown size={16} style={{ color: 'var(--text-main)' }} />;
+      case 'replay': return <Film size={16} style={{ color: 'var(--brand-celeste)' }} />;
+      default: return <Bell size={16} style={{ color: 'var(--brand-celeste)' }} />;
     }
   };
 
@@ -30,8 +30,8 @@ export function NotificationsModal({
           justifyContent: 'space-between'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Bell size={20} style={{ color: 'var(--emerald-400)' }} />
-            <h3 style={{ fontSize: '18px', fontWeight: 700 }}>Notificaciones de Traction</h3>
+            <Bell size={20} style={{ color: 'var(--brand-celeste)' }} />
+            <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-main)' }}>Notificaciones</h3>
           </div>
           <button 
             onClick={onClose}
@@ -49,8 +49,8 @@ export function NotificationsModal({
               style={{
                 padding: '14px 16px',
                 borderRadius: 'var(--radius-md)',
-                background: notif.read ? 'var(--bg-deep)' : 'var(--bg-surface-elevated)',
-                border: notif.read ? '1px solid var(--border-subtle)' : '1px solid rgba(16, 185, 129, 0.3)',
+                backgroundColor: notif.read ? 'var(--bg-surface)' : 'var(--brand-celeste-subtle)',
+                border: notif.read ? '1px solid var(--border-subtle)' : '1px solid var(--brand-celeste-border)',
                 cursor: 'pointer',
                 display: 'flex',
                 gap: '14px',
@@ -61,7 +61,8 @@ export function NotificationsModal({
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
-                background: 'rgba(255, 255, 255, 0.05)',
+                backgroundColor: 'var(--bg-surface-elevated)',
+                border: '1px solid var(--border-subtle)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -90,7 +91,7 @@ export function NotificationsModal({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          background: 'var(--bg-deep)'
+          backgroundColor: 'var(--bg-surface-elevated)'
         }}>
           <button 
             className="btn btn-secondary btn-sm"
@@ -107,3 +108,5 @@ export function NotificationsModal({
     </div>
   );
 }
+
+export default NotificationsModal;

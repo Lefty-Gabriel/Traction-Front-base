@@ -21,11 +21,11 @@ export function MembershipModal({
           justifyContent: 'space-between'
         }}>
           <div>
-            <div className="badge badge-amber" style={{ marginBottom: '6px' }}>
+            <div className="badge badge-emerald" style={{ marginBottom: '6px' }}>
               <Crown size={12} />
-              <span>Niveles de Membresía Traction</span>
+              <span>Niveles de Membresía</span>
             </div>
-            <h2 style={{ fontSize: '22px', fontWeight: 800 }}>Elige tu Plan de Aceleración Empresarial</h2>
+            <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-main)' }}>Elige tu Plan de Membresía</h2>
           </div>
           <button 
             onClick={onClose}
@@ -42,14 +42,14 @@ export function MembershipModal({
               <div 
                 key={plan.id}
                 style={{
-                  background: isCurrent ? 'linear-gradient(180deg, rgba(16, 185, 129, 0.12), rgba(16, 22, 35, 0.9))' : 'var(--bg-surface-elevated)',
-                  border: isCurrent ? '2px solid var(--emerald-500)' : '1px solid var(--border-subtle)',
+                  backgroundColor: isCurrent ? 'var(--brand-celeste-subtle)' : 'var(--bg-surface)',
+                  border: isCurrent ? '2px solid var(--brand-celeste)' : '1px solid var(--border-subtle)',
                   borderRadius: 'var(--radius-lg)',
                   padding: '24px',
                   display: 'flex',
                   flexDirection: 'column',
                   position: 'relative',
-                  boxShadow: isCurrent ? '0 0 25px rgba(16, 185, 129, 0.15)' : 'none'
+                  boxShadow: 'var(--shadow-sm)'
                 }}
               >
                 {isCurrent && (
@@ -58,8 +58,8 @@ export function MembershipModal({
                     top: '-12px',
                     left: '50%',
                     transform: 'translateX(-50%)',
-                    background: 'var(--emerald-500)',
-                    color: '#042416',
+                    backgroundColor: 'var(--brand-celeste)',
+                    color: '#FFFFFF',
                     fontSize: '11px',
                     fontWeight: 800,
                     padding: '3px 12px',
@@ -76,12 +76,12 @@ export function MembershipModal({
                     fontSize: '11px',
                     textTransform: 'uppercase',
                     letterSpacing: '0.08em',
-                    color: isCurrent ? 'var(--emerald-400)' : 'var(--text-dim)',
+                    color: isCurrent ? 'var(--brand-celeste)' : 'var(--text-dim)',
                     fontWeight: 700
                   }}>
                     {plan.badge}
                   </span>
-                  <h3 style={{ fontSize: '20px', fontWeight: 800, marginTop: '4px' }}>{plan.name}</h3>
+                  <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-main)', marginTop: '4px' }}>{plan.name}</h3>
                   <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-main)', marginTop: '8px' }}>
                     {plan.price}
                   </div>
@@ -95,7 +95,7 @@ export function MembershipModal({
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
                   {plan.features.map((feature, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '12px' }}>
-                      <Check size={16} style={{ color: 'var(--emerald-400)', flexShrink: 0, marginTop: '2px' }} />
+                      <Check size={16} style={{ color: 'var(--brand-celeste)', flexShrink: 0, marginTop: '2px' }} />
                       <span style={{ color: 'var(--text-muted)' }}>{feature}</span>
                     </div>
                   ))}
@@ -119,7 +119,7 @@ export function MembershipModal({
         <div style={{
           padding: '16px 28px',
           borderTop: '1px solid var(--border-subtle)',
-          background: 'var(--bg-deep)',
+          backgroundColor: 'var(--bg-surface-elevated)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -127,7 +127,7 @@ export function MembershipModal({
           color: 'var(--text-dim)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Sparkles size={14} style={{ color: 'var(--gold-400)' }} />
+            <Sparkles size={14} style={{ color: 'var(--brand-celeste)' }} />
             <span>Facturación transparente para empresas. Cancela o cambia de nivel en cualquier momento.</span>
           </div>
           <button className="btn btn-secondary btn-sm" onClick={onClose}>
@@ -138,3 +138,5 @@ export function MembershipModal({
     </div>
   );
 }
+
+export default MembershipModal;

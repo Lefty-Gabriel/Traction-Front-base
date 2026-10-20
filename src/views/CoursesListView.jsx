@@ -26,7 +26,7 @@ export function CoursesListView({ courses, onSelectCourse }) {
               <span>Programas Curriculares</span>
             </span>
           </div>
-          <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#FFFFFF' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-main)' }}>
             Catálogo de Programas de Negocio
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '4px' }}>
@@ -43,11 +43,11 @@ export function CoursesListView({ courses, onSelectCourse }) {
             onChange={(e) => setSearch(e.target.value)}
             style={{
               width: '100%',
-              padding: '10px 14px',
+              padding: '9px 14px',
               borderRadius: 'var(--radius-md)',
-              background: 'var(--bg-surface)',
+              backgroundColor: 'var(--bg-surface)',
               border: '1px solid var(--border-subtle)',
-              color: '#FFF',
+              color: 'var(--text-main)',
               fontSize: '13px',
               outline: 'none'
             }}
@@ -64,9 +64,9 @@ export function CoursesListView({ courses, onSelectCourse }) {
             style={{
               padding: '8px 16px',
               borderRadius: 'var(--radius-full)',
-              border: selectedCategory === cat ? '1px solid var(--emerald-500)' : '1px solid var(--border-subtle)',
-              background: selectedCategory === cat ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-surface)',
-              color: selectedCategory === cat ? 'var(--emerald-400)' : 'var(--text-muted)',
+              border: selectedCategory === cat ? '1px solid var(--brand-celeste)' : '1px solid var(--border-subtle)',
+              backgroundColor: selectedCategory === cat ? 'var(--brand-celeste-subtle)' : 'var(--bg-surface)',
+              color: selectedCategory === cat ? 'var(--brand-celeste)' : 'var(--text-muted)',
               fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer',
@@ -78,7 +78,14 @@ export function CoursesListView({ courses, onSelectCourse }) {
         ))}
       </div>
 
-      {/* Grid de Cursos */}
+      {/* Grid de Cursos (Sin degradados) */}
+      {filteredCourses.length === 0 && (
+        <div className="card" style={{ textAlign: 'center', padding: '48px 24px' }}>
+          <BookOpen size={34} style={{ color: 'var(--brand-celeste)', marginBottom: 12 }} />
+          <h3 style={{ color: 'var(--text-main)', marginBottom: 6 }}>No hay cursos disponibles</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Los cursos que te correspondan aparecerán aquí cuando se creen o te matriculen.</p>
+        </div>
+      )}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '24px' }}>
         {filteredCourses.map((course) => (
           <div 
@@ -93,29 +100,37 @@ export function CoursesListView({ courses, onSelectCourse }) {
               height: '190px',
               borderRadius: 'var(--radius-md)',
               overflow: 'hidden',
-              marginBottom: '16px'
+              marginBottom: '16px',
+              border: '1px solid var(--border-subtle)'
             }}>
               <img 
                 src={course.thumbnail} 
                 alt={course.title} 
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
-              <div style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'linear-gradient(to top, rgba(9, 13, 22, 0.9) 0%, transparent 60%)'
-              }} />
 
               <span className="badge badge-emerald" style={{ position: 'absolute', top: '12px', left: '12px' }}>
                 {course.category}
               </span>
 
-              <div style={{ position: 'absolute', bottom: '12px', left: '12px', right: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#FFF', fontWeight: 600 }}>
+              <div style={{
+                position: 'absolute',
+                bottom: '10px',
+                left: '10px',
+                right: '10px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                backgroundColor: 'rgba(15, 23, 42, 0.85)',
+                backdropFilter: 'blur(4px)',
+                padding: '4px 10px',
+                borderRadius: 'var(--radius-sm)'
+              }}>
+                <span style={{ fontSize: '12px', color: '#FFFFFF', fontWeight: 600 }}>
                   <Clock size={12} style={{ display: 'inline', marginRight: '4px' }} />
                   {course.estimatedHours}
                 </span>
-                <span style={{ fontSize: '12px', color: 'var(--gold-300)', fontWeight: 700 }}>
+                <span style={{ fontSize: '12px', color: '#FCD34D', fontWeight: 700 }}>
                   ★ {course.rating}
                 </span>
               </div>
@@ -123,10 +138,10 @@ export function CoursesListView({ courses, onSelectCourse }) {
 
             {/* Contenido */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--emerald-400)', fontWeight: 700, marginBottom: '4px' }}>
+              <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--brand-celeste)', fontWeight: 700, marginBottom: '4px' }}>
                 Nivel {course.level}
               </div>
-              <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#FFFFFF', marginBottom: '8px', lineHeight: '1.3' }}>
+              <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '8px', lineHeight: '1.3' }}>
                 {course.title}
               </h3>
               <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.5', marginBottom: '16px' }}>
@@ -151,7 +166,7 @@ export function CoursesListView({ courses, onSelectCourse }) {
                 <div style={{ width: '130px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
                     <span style={{ color: 'var(--text-dim)' }}>Progreso</span>
-                    <span style={{ color: 'var(--emerald-400)', fontWeight: 700 }}>{course.progressPercent}%</span>
+                    <span style={{ color: 'var(--brand-celeste)', fontWeight: 700 }}>{course.progressPercent}%</span>
                   </div>
                   <div className="progress-bar-container" style={{ height: '6px' }}>
                     <div className="progress-bar-fill" style={{ width: `${course.progressPercent}%` }} />
@@ -177,3 +192,5 @@ export function CoursesListView({ courses, onSelectCourse }) {
     </div>
   );
 }
+
+export default CoursesListView;

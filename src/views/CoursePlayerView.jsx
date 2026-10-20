@@ -93,7 +93,7 @@ export function CoursePlayerView({
             <div style={{ fontSize: '11px', color: 'var(--emerald-400)', fontWeight: 700, textTransform: 'uppercase' }}>
               {course.category} • {currentModule?.title.split(':')[0]}
             </div>
-            <h1 style={{ fontSize: '18px', fontWeight: 800, color: '#FFFFFF' }}>
+            <h1 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-main)' }}>
               {course.title}
             </h1>
           </div>
@@ -136,8 +136,8 @@ export function CoursePlayerView({
                 position: 'absolute',
                 top: '20px',
                 right: '20px',
-                background: 'rgba(16, 185, 129, 0.95)',
-                color: '#042416',
+                background: 'var(--brand-celeste)',
+                color: '#000000',
                 padding: '10px 18px',
                 borderRadius: 'var(--radius-full)',
                 display: 'flex',
@@ -186,8 +186,8 @@ export function CoursePlayerView({
                     key={spd}
                     onClick={() => setPlaybackSpeed(spd)}
                     style={{
-                      background: playbackSpeed === spd ? 'var(--emerald-500)' : 'transparent',
-                      color: playbackSpeed === spd ? '#042416' : 'var(--text-muted)',
+                      background: playbackSpeed === spd ? 'var(--brand-celeste)' : 'transparent',
+                      color: playbackSpeed === spd ? '#000000' : 'var(--text-muted)',
                       border: 'none',
                       padding: '2px 6px',
                       borderRadius: '4px',
@@ -227,7 +227,7 @@ export function CoursePlayerView({
 
           {/* Información y Pestañas de la Lección */}
           <div className="card">
-            <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#FFFFFF', marginBottom: '6px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '6px' }}>
               {currentLesson?.title}
             </h2>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '20px' }}>
@@ -274,10 +274,10 @@ export function CoursePlayerView({
                   <div style={{
                     padding: '16px',
                     borderRadius: 'var(--radius-md)',
-                    background: 'rgba(16, 185, 129, 0.08)',
-                    border: '1px solid rgba(16, 185, 129, 0.25)'
+                    background: 'rgba(6, 171, 235, 0.08)',
+                    border: '1px solid rgba(6, 171, 235, 0.3)'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--emerald-400)', fontWeight: 700, fontSize: '13px', marginBottom: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--brand-celeste)', fontWeight: 700, fontSize: '13px', marginBottom: '6px' }}>
                       <Sparkles size={16} />
                       <span>Insight Estratégico de Tracción</span>
                     </div>
@@ -307,11 +307,11 @@ export function CoursePlayerView({
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ width: '38px', height: '38px', borderRadius: 'var(--radius-sm)', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--emerald-400)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: '38px', height: '38px', borderRadius: 'var(--radius-sm)', background: 'rgba(6, 171, 235, 0.12)', color: 'var(--brand-celeste)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           {res.type === 'excel' ? <FileSpreadsheet size={20} /> : <FileText size={20} />}
                         </div>
                         <div>
-                          <div style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF' }}>{res.title}</div>
+                          <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-main)' }}>{res.title}</div>
                           <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>{res.size} • Material oficial Traction</div>
                         </div>
                       </div>
@@ -354,7 +354,7 @@ export function CoursePlayerView({
                     border: '1px solid var(--border-medium)',
                     borderRadius: 'var(--radius-md)',
                     padding: '14px',
-                    color: '#FFFFFF',
+                    color: 'var(--text-main)',
                     fontFamily: 'inherit',
                     fontSize: '14px',
                     lineHeight: '1.6',
@@ -375,7 +375,7 @@ export function CoursePlayerView({
             borderBottom: '1px solid var(--border-subtle)',
             background: 'var(--bg-surface-elevated)'
           }}>
-            <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#FFFFFF', marginBottom: '4px' }}>
+            <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>
               Contenido del Programa
             </h3>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
@@ -396,7 +396,7 @@ export function CoursePlayerView({
                     onClick={() => handleToggleModule(mod.id)}
                   >
                     <div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#FFFFFF' }}>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>
                         {mod.title}
                       </div>
                       <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>
@@ -430,7 +430,7 @@ export function CoursePlayerView({
                             </button>
 
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div className="lesson-title" style={{ fontSize: '12px', color: isCurrent ? '#FFF' : 'var(--text-muted)', lineHeight: '1.4' }}>
+                              <div className="lesson-title" style={{ fontSize: '12px', color: isCurrent ? 'var(--brand-celeste)' : 'var(--text-muted)', lineHeight: '1.4' }}>
                                 {lesson.title}
                               </div>
                               <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>

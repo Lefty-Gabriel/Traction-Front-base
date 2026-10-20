@@ -12,9 +12,20 @@ export function AdminView({
   onAddCourse, 
   onAddLiveClass, 
   mentors,
+  users = [],
+  currentUserId,
+  onUpdateUserRole,
+  onAssignUserToCourse,
+  onCreateUser,
   currentView = 'admin-overview',
   onNavigate 
 }) {
+  const defaultSchedule = () => {
+    const date = new Date(Date.now() + 60 * 60 * 1000);
+    date.setMinutes(0, 0, 0);
+    const offset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+  };
   // Sync tab with sidebar currentView
   const getInitialTab = () => {
     if (currentView === 'admin-courses') return 'courses';
@@ -27,6 +38,10 @@ export function AdminView({
   const [showCreateCourseModal, setShowCreateCourseModal] = useState(false);
   const [showScheduleLiveModal, setShowScheduleLiveModal] = useState(false);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+  const [userActionError, setUserActionError] = useState('');
+  const [userActionSuccess, setUserActionSuccess] = useState('');
+  const [assignmentSelections, setAssignmentSelections] = useState({});
+  const [savingUserId, setSavingUserId] = useState(null);
 
   // Sync state if currentView prop changes externally from the sidebar
   useEffect(() => {
@@ -58,25 +73,32 @@ export function AdminView({
 
   // Form states for new Live Class
   const [liveForm, setLiveForm] = useState({
+    courseId: '',
     title: '',
     subtitle: '',
     mentorName: mentors[0]?.name || 'Sofía Valenzuela',
-    date: 'Próximo Miércoles',
-    time: '19:00 (GMT-5)',
-    duration: '75 min',
+    scheduledAt: defaultSchedule(),
+    durationMinutes: 75,
     joinUrl: 'https://zoom.us/j/traction-live-new',
     category: 'Ventas & Crecimiento'
   });
 
   // Students list state
-  const [students, setStudents] = useState([
-    { id: 'st_1', name: 'Alejandro Morales', company: 'ScaleTech', email: 'alejandro@scaletech.io', plan: 'Scale Pass', status: 'Activo', joined: 'Ene 2026' },
-    { id: 'st_2', name: 'Valeria Gómez', company: 'FinPay LatAm', email: 'valeria@finpay.com', plan: 'Executive Council', status: 'Activo', joined: 'Feb 2026' },
-    { id: 'st_3', name: 'Mateo Carvajal', company: 'LogiFast', email: 'mateo@logifast.co', plan: 'Scale Pass', status: 'Activo', joined: 'Ene 2026' },
-    { id: 'st_4', name: 'Ignacio Silva', company: 'SaaSify', email: 'ignacio@saasify.app', plan: 'Growth Pass', status: 'Activo', joined: 'Mar 2026' },
-    { id: 'st_5', name: 'Mariana Duarte', company: 'HealthPulse', email: 'mariana@healthpulse.io', plan: 'Growth Pass', status: 'Pendiente Pago', joined: 'Hace 3 días' },
-    { id: 'st_6', name: 'Rodrigo Albarracín', company: 'NubeLogistics', email: 'rodrigo@nubelog.com', plan: 'Scale Pass', status: 'Activo', joined: 'Ene 2026' }
-  ]);
+  const [students, setStudents] = useState([]);
+
+  useEffect(() => {
+    setStudents(users.map((item) => ({
+      id: item.id,
+      name: item.fullName,
+      company: item.company || 'Sin empresa registrada',
+      email: item.email,
+      role: item.role,
+      phone: item.phone || '',
+      location: item.location || '',
+      status: 'Activo',
+      joined: 'Registrado',
+    })));
+  }, [users]);
 
   // Student filter & search state
   const [studentSearch, setStudentSearch] = useState('');
@@ -87,10 +109,11 @@ export function AdminView({
     name: '',
     company: '',
     email: '',
-    plan: 'Scale Pass'
+    role: 'estudiante',
+    password: ''
   });
 
-  const handleCreateCourseSubmit = (e) => {
+  const handleCreateCourseSubmit = async (e) => {
     e.preventDefault();
     if (!courseForm.title.trim()) return;
 
@@ -113,7 +136,7 @@ export function AdminView({
       modules: []
     };
 
-    onAddCourse(newCourseObj);
+    await onAddCourse(newCourseObj);
     setShowCreateCourseModal(false);
     setCourseForm({
       title: '',
@@ -125,19 +148,20 @@ export function AdminView({
     });
   };
 
-  const handleScheduleLiveSubmit = (e) => {
+  const handleScheduleLiveSubmit = async (e) => {
     e.preventDefault();
     if (!liveForm.title.trim()) return;
 
     const newLiveObj = {
       id: `live_${Date.now()}`,
+      courseId: liveForm.courseId,
       title: liveForm.title,
       subtitle: liveForm.subtitle,
       mentorName: liveForm.mentorName,
       mentorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
       date: liveForm.date,
-      time: liveForm.time,
-      duration: liveForm.duration,
+      scheduledAt: new Date(liveForm.scheduledAt).toISOString(),
+      durationMinutes: Number(liveForm.durationMinutes),
       isToday: false,
       isLiveNow: false,
       joinUrl: liveForm.joinUrl,
@@ -146,43 +170,62 @@ export function AdminView({
       badge: 'Programada'
     };
 
-    onAddLiveClass(newLiveObj);
+    await onAddLiveClass(newLiveObj);
     setShowScheduleLiveModal(false);
   };
 
-  const handleUpdateStudentPlan = (studentId, newPlan) => {
-    setStudents(prev => prev.map(s => {
-      if (s.id === studentId) {
-        return { ...s, plan: newPlan };
-      }
-      return s;
-    }));
+  const handleUpdateStudentPlan = async (studentId, newRole) => {
+    setUserActionError('');
+    setUserActionSuccess('');
+    setSavingUserId(studentId);
+    try {
+      await onUpdateUserRole(studentId, newRole);
+      setUserActionSuccess('Rol actualizado y guardado correctamente.');
+    } catch (error) {
+      setUserActionError(error.message || 'No se pudo actualizar el rol.');
+    } finally {
+      setSavingUserId(null);
+    }
   };
 
-  const handleAddStudentSubmit = (e) => {
+  const handleAssignCourse = async (account) => {
+    const courseId = assignmentSelections[account.id];
+    if (!courseId) return;
+    setUserActionError('');
+    setUserActionSuccess('');
+    setSavingUserId(account.id);
+    try {
+      await onAssignUserToCourse(account.id, account.role, courseId);
+      setUserActionSuccess(account.role === 'mentor' || account.role === 'docente' ? 'Mentor asignado al curso.' : 'Estudiante matriculado en el curso.');
+    } catch (error) {
+      setUserActionError(error.message || 'No se pudo guardar la asignación.');
+    } finally {
+      setSavingUserId(null);
+    }
+  };
+
+  const handleAddStudentSubmit = async (e) => {
     e.preventDefault();
     if (!newStudentForm.name.trim() || !newStudentForm.email.trim()) return;
-
-    const newStudent = {
-      id: `st_${Date.now()}`,
-      name: newStudentForm.name,
-      company: newStudentForm.company || 'Empresa Independiente',
-      email: newStudentForm.email,
-      plan: newStudentForm.plan,
-      status: 'Activo',
-      joined: 'Hoy'
-    };
-
-    setStudents([newStudent, ...students]);
-    setNewStudentForm({ name: '', company: '', email: '', plan: 'Scale Pass' });
-    setShowAddStudentModal(false);
+    setUserActionError('');
+    setSavingUserId('new');
+    try {
+      await onCreateUser({ fullName: newStudentForm.name, company: newStudentForm.company, email: newStudentForm.email, role: newStudentForm.role, password: newStudentForm.password });
+      setNewStudentForm({ name: '', company: '', email: '', role: 'estudiante', password: '' });
+      setShowAddStudentModal(false);
+      setUserActionSuccess('Usuario creado y guardado correctamente.');
+    } catch (error) {
+      setUserActionError(error.message || 'No se pudo crear el usuario.');
+    } finally {
+      setSavingUserId(null);
+    }
   };
 
   const filteredStudents = students.filter(s => {
     const matchesSearch = s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
                           s.company.toLowerCase().includes(studentSearch.toLowerCase()) ||
                           s.email.toLowerCase().includes(studentSearch.toLowerCase());
-    const matchesPlan = studentPlanFilter === 'all' || s.plan.toLowerCase().includes(studentPlanFilter.toLowerCase());
+    const matchesPlan = studentPlanFilter === 'all' || s.role === studentPlanFilter;
     return matchesSearch && matchesPlan;
   });
 
@@ -197,7 +240,7 @@ export function AdminView({
               <span>Panel de Control Administrativo (CMS)</span>
             </span>
           </div>
-          <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#FFFFFF' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-main)' }}>
             Gestión Integral de Traction
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '4px' }}>
@@ -209,7 +252,7 @@ export function AdminView({
       {/* Métricas Globales del Negocio */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
         <div className="stat-card">
-          <div className="stat-icon-wrapper" style={{ background: 'rgba(16, 185, 129, 0.15)', color: 'var(--emerald-400)' }}>
+          <div className="stat-icon-wrapper" style={{ background: 'rgba(6, 171, 235, 0.14)', color: 'var(--brand-celeste)' }}>
             <Users size={22} />
           </div>
           <div>
@@ -219,7 +262,7 @@ export function AdminView({
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon-wrapper" style={{ background: 'rgba(245, 158, 11, 0.15)', color: 'var(--gold-400)' }}>
+          <div className="stat-icon-wrapper" style={{ background: 'var(--bg-surface-elevated)', color: 'var(--text-main)' }}>
             <DollarSign size={22} />
           </div>
           <div>
@@ -229,7 +272,7 @@ export function AdminView({
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon-wrapper" style={{ background: 'rgba(6, 182, 212, 0.15)', color: 'var(--cyan-400)' }}>
+          <div className="stat-icon-wrapper" style={{ background: 'rgba(6, 171, 235, 0.10)', color: 'var(--brand-celeste-light)' }}>
             <Radio size={22} />
           </div>
           <div>
@@ -273,7 +316,7 @@ export function AdminView({
           className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => handleTabChange('users')}
         >
-          Estudiantes & Accesos ({students.length})
+          Usuarios & Permisos ({students.length})
         </button>
       </div>
 
@@ -293,7 +336,7 @@ export function AdminView({
                 <span className="badge badge-emerald">Cursos</span>
                 <ChevronRight size={16} />
               </div>
-              <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#FFF' }}>Publicar o Modificar Cursos</h4>
+              <h4 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-main)' }}>Publicar o Modificar Cursos</h4>
               <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
                 {courses.length} programas activos en la plataforma.
               </p>
@@ -308,7 +351,7 @@ export function AdminView({
                 <span className="badge badge-amber">Clases en Vivo</span>
                 <ChevronRight size={16} />
               </div>
-              <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#FFF' }}>Agendar Nueva Clase en Vivo</h4>
+              <h4 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-main)' }}>Agendar Nueva Clase en Vivo</h4>
               <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
                 {liveClasses.length} sesiones agendadas con mentores.
               </p>
@@ -323,7 +366,7 @@ export function AdminView({
                 <span className="badge badge-purple">Accesos</span>
                 <ChevronRight size={16} />
               </div>
-              <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#FFF' }}>Gestionar Membresías de Alumnos</h4>
+              <h4 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-main)' }}>Gestionar Membresías de Alumnos</h4>
               <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
                 {students.length} estudiantes registrados recientemente.
               </p>
@@ -340,7 +383,7 @@ export function AdminView({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: 'var(--bg-deep)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#FFF' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main)' }}>
                     Alejandro Morales completó la lección "3.1 Framework SPICED"
                   </div>
                   <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>Machine de Ventas B2B • Hace 12 minutos</div>
@@ -350,7 +393,7 @@ export function AdminView({
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: 'var(--bg-deep)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#FFF' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main)' }}>
                     Valeria Gómez actualizó su plan a "Executive Council" ($199/mes)
                   </div>
                   <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>FinPay LatAm • Facturación confirmada • Hace 1 hora</div>
@@ -360,7 +403,7 @@ export function AdminView({
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: 'var(--bg-deep)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#FFF' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main)' }}>
                     Sofía Valenzuela confirmó la sala para el taller de hoy a las 18:30
                   </div>
                   <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>142 alumnos confirmados en lista de asistencia</div>
@@ -415,7 +458,7 @@ export function AdminView({
                     style={{ width: '60px', height: '45px', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }}
                   />
                   <div>
-                    <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#FFFFFF' }}>{course.title}</h4>
+                    <h4 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-main)' }}>{course.title}</h4>
                     <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                       Mentor: <strong style={{ color: 'var(--text-main)' }}>{course.mentorName}</strong> • {course.category} • {course.estimatedHours}
                     </div>
@@ -479,7 +522,7 @@ export function AdminView({
                     <span className="badge badge-live" style={{ fontSize: '11px' }}>{item.badge}</span>
                     <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{item.date} • {item.time}</span>
                   </div>
-                  <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#FFFFFF' }}>{item.title}</h4>
+                  <h4 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-main)' }}>{item.title}</h4>
                   <div style={{ fontSize: '12px', color: 'var(--text-dim)' }}>
                     Mentor: {item.mentorName} • Link: {item.joinUrl}
                   </div>
@@ -508,9 +551,9 @@ export function AdminView({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
             <div>
-              <h3 style={{ fontSize: '18px', fontWeight: 800 }}>Gestión de Estudiantes & Accesos por Membresía</h3>
+              <h3 style={{ fontSize: '18px', fontWeight: 800 }}>Usuarios, roles y acceso a cursos</h3>
               <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                Modifica los permisos de cada alumno para habilitar cursos grabados, vivos semanales o clínicas ejecutivas 1 a 1.
+                Administra estudiantes, mentores y administradores. Los cambios se guardan directamente en la base de datos.
               </p>
             </div>
             <button 
@@ -519,29 +562,29 @@ export function AdminView({
               style={{ gap: '6px' }}
             >
               <UserPlus size={16} />
-              <span>Registrar / Invitar Alumno</span>
+              <span>Registrar / Invitar Usuario</span>
             </button>
           </div>
 
           {/* Filtros y Buscador de Estudiantes */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             <div style={{ display: 'flex', gap: '8px' }}>
-              {['all', 'Growth Pass', 'Scale Pass', 'Executive Council'].map((plan) => (
+              {[['all', 'Todos'], ['estudiante', 'Estudiantes'], ['mentor', 'Mentores'], ['admin', 'Administradores']].map(([plan, label]) => (
                 <button
                   key={plan}
                   onClick={() => setStudentPlanFilter(plan)}
                   style={{
                     padding: '6px 14px',
                     borderRadius: 'var(--radius-full)',
-                    border: studentPlanFilter === plan ? '1px solid var(--emerald-500)' : '1px solid var(--border-subtle)',
-                    background: studentPlanFilter === plan ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-surface)',
-                    color: studentPlanFilter === plan ? 'var(--emerald-400)' : 'var(--text-muted)',
+                    border: studentPlanFilter === plan ? '1px solid var(--brand-celeste)' : '1px solid var(--border-subtle)',
+                    background: studentPlanFilter === plan ? 'rgba(6, 171, 235, 0.15)' : 'var(--bg-surface)',
+                    color: studentPlanFilter === plan ? 'var(--brand-celeste)' : 'var(--text-muted)',
                     fontSize: '12px',
                     fontWeight: 600,
                     cursor: 'pointer'
                   }}
                 >
-                  {plan === 'all' ? 'Todos los Planes' : plan}
+                  {label}
                 </button>
               ))}
             </div>
@@ -559,7 +602,7 @@ export function AdminView({
                   borderRadius: 'var(--radius-sm)',
                   background: 'var(--bg-surface)',
                   border: '1px solid var(--border-subtle)',
-                  color: '#FFF',
+                  color: 'var(--text-main)',
                   fontSize: '12px',
                   outline: 'none'
                 }}
@@ -567,54 +610,71 @@ export function AdminView({
             </div>
           </div>
 
+          {userActionError && <div role="alert" style={{ padding: '12px 14px', borderRadius: '10px', background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B', fontSize: '13px' }}>{userActionError}</div>}
+          {userActionSuccess && <div role="status" style={{ padding: '12px 14px', borderRadius: '10px', background: '#ECFDF5', border: '1px solid #6EE7B7', color: '#065F46', fontSize: '13px' }}>{userActionSuccess}</div>}
+
           {/* Tabla de Estudiantes */}
           <div style={{ overflowX: 'auto', background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-deep)', color: 'var(--text-dim)' }}>
-                  <th style={{ padding: '14px 18px', fontWeight: 700 }}>Estudiante</th>
-                  <th style={{ padding: '14px 18px', fontWeight: 700 }}>Empresa</th>
-                  <th style={{ padding: '14px 18px', fontWeight: 700 }}>Nivel de Acceso (Plan)</th>
-                  <th style={{ padding: '14px 18px', fontWeight: 700 }}>Estado</th>
-                  <th style={{ padding: '14px 18px', fontWeight: 700 }}>Cambiar Nivel de Acceso</th>
+                  <th style={{ padding: '14px 18px', fontWeight: 700 }}>Usuario</th>
+                  <th style={{ padding: '14px 18px', fontWeight: 700 }}>Datos</th>
+                  <th style={{ padding: '14px 18px', fontWeight: 700 }}>Rol y permisos</th>
+                  <th style={{ padding: '14px 18px', fontWeight: 700 }}>Asignación a curso</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredStudents.map((student) => (
                   <tr key={student.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                    <td style={{ padding: '14px 18px', fontWeight: 600, color: '#FFF' }}>
+                    <td style={{ padding: '14px 18px', fontWeight: 600, color: 'var(--text-main)' }}>
                       {student.name}
                       <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>{student.email} • Registrado: {student.joined}</div>
                     </td>
-                    <td style={{ padding: '14px 18px', color: 'var(--text-muted)' }}>{student.company}</td>
                     <td style={{ padding: '14px 18px' }}>
-                      <span className={student.plan.includes('Executive') ? 'badge badge-amber' : 'badge badge-emerald'}>
-                        <Crown size={12} /> {student.plan}
-                      </span>
-                    </td>
-                    <td style={{ padding: '14px 18px' }}>
-                      <span style={{ color: student.status === 'Activo' ? 'var(--emerald-400)' : '#F59E0B', fontWeight: 600 }}>
-                        {student.status}
-                      </span>
+                      <div style={{ color: 'var(--text-muted)' }}>{student.company}</div>
+                      {student.phone && <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>{student.phone}</div>}
+                      {student.location && <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>{student.location}</div>}
                     </td>
                     <td style={{ padding: '14px 18px' }}>
                       <select 
-                        value={student.plan}
+                        value={student.role}
                         onChange={(e) => handleUpdateStudentPlan(student.id, e.target.value)}
+                        disabled={student.id === currentUserId || savingUserId === student.id}
                         style={{
                           background: 'var(--bg-deep)',
                           border: '1px solid var(--border-subtle)',
                           borderRadius: 'var(--radius-sm)',
-                          color: '#FFF',
+                          color: 'var(--text-main)',
                           padding: '6px 12px',
                           fontSize: '12px',
                           cursor: 'pointer'
                         }}
                       >
-                        <option value="Growth Pass">Growth Pass (Solo Grabados)</option>
-                        <option value="Scale Pass">Scale Pass (Grabados + Vivos + Replays)</option>
-                        <option value="Executive Council">Executive Council (Total + Mentoría 1 a 1)</option>
+                        <option value="estudiante">Estudiante</option>
+                        <option value="mentor">Mentor</option>
+                        <option value="admin">Administrador</option>
                       </select>
+                      {student.id === currentUserId && <div style={{ marginTop: 5, fontSize: 10, color: 'var(--text-dim)' }}>Tu cuenta administrativa</div>}
+                    </td>
+                    <td style={{ padding: '14px 18px' }}>
+                      {student.role === 'admin' ? (
+                        <span style={{ color: 'var(--text-dim)', fontSize: 12 }}>Acceso global</span>
+                      ) : (
+                        <div style={{ display: 'flex', gap: 8, minWidth: 280 }}>
+                          <select
+                            value={assignmentSelections[student.id] || ''}
+                            onChange={(e) => setAssignmentSelections((current) => ({ ...current, [student.id]: e.target.value }))}
+                            style={{ flex: 1, background: 'var(--bg-deep)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-main)', padding: '6px 8px', fontSize: 12 }}
+                          >
+                            <option value="">Seleccionar curso</option>
+                            {courses.map((course) => <option key={course.id} value={course.id}>{course.title}</option>)}
+                          </select>
+                          <button type="button" className="btn btn-primary btn-sm" disabled={!assignmentSelections[student.id] || savingUserId === student.id} onClick={() => handleAssignCourse(student)}>
+                            {student.role === 'mentor' || student.role === 'docente' ? 'Asignar' : 'Matricular'}
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -629,8 +689,8 @@ export function AdminView({
         <div className="modal-backdrop" onClick={() => setShowAddStudentModal(false)}>
           <div className="modal-dialog" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px' }}>
             <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-subtle)' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: 800 }}>Registrar Nuevo Estudiante</h3>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Asigna los datos y el nivel de membresía inicial para otorgar acceso.</p>
+              <h3 style={{ fontSize: '18px', fontWeight: 800 }}>Registrar Nuevo Usuario</h3>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Crea una cuenta y asigna su rol inicial.</p>
             </div>
 
             <form onSubmit={handleAddStudentSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -643,7 +703,7 @@ export function AdminView({
                   placeholder="Ej: Daniel Castillo"
                   value={newStudentForm.name}
                   onChange={(e) => setNewStudentForm({ ...newStudentForm, name: e.target.value })}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: '#FFF', fontSize: '13px' }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: 'var(--text-main)', fontSize: '13px' }}
                   required
                 />
               </div>
@@ -657,7 +717,7 @@ export function AdminView({
                   placeholder="Ej: InnoScale B2B"
                   value={newStudentForm.company}
                   onChange={(e) => setNewStudentForm({ ...newStudentForm, company: e.target.value })}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: '#FFF', fontSize: '13px' }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: 'var(--text-main)', fontSize: '13px' }}
                 />
               </div>
 
@@ -670,32 +730,37 @@ export function AdminView({
                   placeholder="daniel@innoscale.com"
                   value={newStudentForm.email}
                   onChange={(e) => setNewStudentForm({ ...newStudentForm, email: e.target.value })}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: '#FFF', fontSize: '13px' }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: 'var(--text-main)', fontSize: '13px' }}
                   required
                 />
               </div>
 
               <div>
                 <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                  Nivel de Membresía Asignado
+                  Rol asignado
                 </label>
                 <select 
-                  value={newStudentForm.plan}
-                  onChange={(e) => setNewStudentForm({ ...newStudentForm, plan: e.target.value })}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: '#FFF', fontSize: '13px' }}
+                  value={newStudentForm.role}
+                  onChange={(e) => setNewStudentForm({ ...newStudentForm, role: e.target.value })}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: 'var(--text-main)', fontSize: '13px' }}
                 >
-                  <option value="Growth Pass">Growth Pass ($49/mes - Cursos grabados)</option>
-                  <option value="Scale Pass">Scale Pass ($99/mes - Cursos + Vivos + Replays)</option>
-                  <option value="Executive Council">Executive Council ($199/mes - Acceso Total + Mentoría 1 a 1)</option>
+                  <option value="estudiante">Estudiante</option>
+                  <option value="mentor">Mentor</option>
+                  <option value="admin">Administrador</option>
                 </select>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Contraseña temporal</label>
+                <input type="password" minLength={8} required placeholder="Mínimo 8 caracteres" value={newStudentForm.password} onChange={(e) => setNewStudentForm({ ...newStudentForm, password: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: 'var(--text-main)', fontSize: '13px' }} />
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
                 <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowAddStudentModal(false)}>
                   Cancelar
                 </button>
-                <button type="submit" className="btn btn-primary btn-sm">
-                  Otorgar Acceso
+                <button type="submit" className="btn btn-primary btn-sm" disabled={savingUserId === 'new'}>
+                  {savingUserId === 'new' ? 'Guardando…' : 'Registrar Usuario'}
                 </button>
               </div>
             </form>
@@ -721,7 +786,7 @@ export function AdminView({
                   placeholder="Ej: Levantamiento de Capital Serie A para Startups"
                   value={courseForm.title}
                   onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: '#FFF', fontSize: '13px' }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: 'var(--text-main)', fontSize: '13px' }}
                   required
                 />
               </div>
@@ -735,7 +800,7 @@ export function AdminView({
                   placeholder="Ej: Prepara tu Data Room, métricas de retención y pitch deck institucional."
                   value={courseForm.tagline}
                   onChange={(e) => setCourseForm({ ...courseForm, tagline: e.target.value })}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: '#FFF', fontSize: '13px' }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: 'var(--text-main)', fontSize: '13px' }}
                 />
               </div>
 
@@ -747,7 +812,7 @@ export function AdminView({
                   <select 
                     value={courseForm.category}
                     onChange={(e) => setCourseForm({ ...courseForm, category: e.target.value })}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: '#FFF', fontSize: '13px' }}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: 'var(--text-main)', fontSize: '13px' }}
                   >
                     <option value="Ventas Estratégicas">Ventas Estratégicas</option>
                     <option value="Finanzas & Runway">Finanzas & Runway</option>
@@ -763,7 +828,7 @@ export function AdminView({
                   <select 
                     value={courseForm.mentorName}
                     onChange={(e) => setCourseForm({ ...courseForm, mentorName: e.target.value })}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: '#FFF', fontSize: '13px' }}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: 'var(--text-main)', fontSize: '13px' }}
                   >
                     {mentors.map(m => (
                       <option key={m.id} value={m.name}>{m.name}</option>
@@ -796,6 +861,38 @@ export function AdminView({
             <form onSubmit={handleScheduleLiveSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
                 <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                  Curso
+                </label>
+                <select
+                  value={liveForm.courseId}
+                  onChange={(e) => setLiveForm({ ...liveForm, courseId: e.target.value })}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: 'var(--text-main)', fontSize: '13px' }}
+                  required
+                >
+                  <option value="">Selecciona un curso</option>
+                  {courses.map((course) => (
+                    <option key={course.id} value={course.id}>{course.title}</option>
+                  ))}
+                </select>
+                {courses.length === 0 && (
+                  <div style={{ marginTop: '10px', padding: '12px 14px', borderRadius: '10px', background: '#FFF7ED', border: '1px solid #FED7AA', color: '#9A3412', fontSize: '12px', lineHeight: 1.5 }}>
+                    <div style={{ fontWeight: 700, marginBottom: '8px' }}>Primero necesitas crear un curso.</div>
+                    <div style={{ marginBottom: '10px' }}>Cada clase en vivo debe estar vinculada a un curso para poder asignarla a estudiantes y mentores.</div>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => {
+                        setShowScheduleLiveModal(false);
+                        setShowCreateCourseModal(true);
+                      }}
+                    >
+                      Crear mi primer curso
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
                   Tema de la Sesión
                 </label>
                 <input 
@@ -803,7 +900,7 @@ export function AdminView({
                   placeholder="Ej: Auditoría en vivo de Modelos Financieros"
                   value={liveForm.title}
                   onChange={(e) => setLiveForm({ ...liveForm, title: e.target.value })}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: '#FFF', fontSize: '13px' }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: 'var(--text-main)', fontSize: '13px' }}
                   required
                 />
               </div>
@@ -814,10 +911,11 @@ export function AdminView({
                     Fecha y Horario
                   </label>
                   <input 
-                    type="text"
-                    value={liveForm.time}
-                    onChange={(e) => setLiveForm({ ...liveForm, time: e.target.value })}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: '#FFF', fontSize: '13px' }}
+                    type="datetime-local"
+                    value={liveForm.scheduledAt}
+                    onChange={(e) => setLiveForm({ ...liveForm, scheduledAt: e.target.value })}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: 'var(--text-main)', fontSize: '13px' }}
+                    required
                   />
                 </div>
                 <div>
@@ -827,7 +925,7 @@ export function AdminView({
                   <select 
                     value={liveForm.mentorName}
                     onChange={(e) => setLiveForm({ ...liveForm, mentorName: e.target.value })}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: '#FFF', fontSize: '13px' }}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: 'var(--text-main)', fontSize: '13px' }}
                   >
                     {mentors.map(m => (
                       <option key={m.id} value={m.name}>{m.name}</option>
@@ -836,11 +934,16 @@ export function AdminView({
                 </div>
               </div>
 
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Duración (minutos)</label>
+                <input type="number" min="15" max="480" step="15" value={liveForm.durationMinutes} onChange={(e) => setLiveForm({ ...liveForm, durationMinutes: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-deep)', border: '1px solid var(--border-medium)', color: 'var(--text-main)', fontSize: '13px' }} required />
+              </div>
+
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
                 <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowScheduleLiveModal(false)}>
                   Cancelar
                 </button>
-                <button type="submit" className="btn btn-primary btn-sm">
+                <button type="submit" className="btn btn-primary btn-sm" disabled={courses.length === 0}>
                   Agendar Sesión
                 </button>
               </div>

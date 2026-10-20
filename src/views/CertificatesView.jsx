@@ -24,77 +24,64 @@ export function CertificatesView({ user }) {
             <span>Acreditaciones Oficiales</span>
           </span>
         </div>
-        <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#FFFFFF' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-main)' }}>
           Certificaciones & Diplomas Ejecutivos
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '4px' }}>
-          Acreditaciones verificables mediante blockchain y código QR que respaldan tus competencias ante inversionistas y juntas directivas.
+          Acreditaciones verificables que respaldan tus competencias operativas y de liderazgo comercial.
         </p>
       </div>
 
-      {/* Diploma Ejecutivo en Formato Grande */}
+      {/* Diploma Ejecutivo en Formato Sólido y Corporativo (Sin Degradados) */}
       <div style={{
-        background: 'linear-gradient(145deg, #0D131F, #090D16)',
-        border: '2px solid rgba(245, 158, 11, 0.4)',
-        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8), var(--glow-gold)',
+        backgroundColor: 'var(--bg-surface)',
+        border: '2px solid var(--brand-celeste-border)',
+        boxShadow: 'var(--shadow-lg)',
         borderRadius: 'var(--radius-lg)',
-        padding: '48px 40px',
-        position: 'relative',
-        overflow: 'hidden'
+        padding: '44px 36px',
+        position: 'relative'
       }}>
-        {/* Adorno de fondo de agua */}
-        <div style={{
-          position: 'absolute',
-          top: '-60px',
-          right: '-60px',
-          width: '280px',
-          height: '280px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(245, 158, 11, 0.08) 0%, transparent 70%)',
-          pointerEvents: 'none'
-        }} />
-
         {/* Encabezado del Certificado */}
-        <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '10px',
-            background: 'rgba(245, 158, 11, 0.12)',
-            padding: '8px 20px',
+            backgroundColor: 'var(--brand-celeste-subtle)',
+            padding: '7px 18px',
             borderRadius: 'var(--radius-full)',
-            border: '1px solid rgba(245, 158, 11, 0.3)',
+            border: '1px solid var(--brand-celeste-border)',
             marginBottom: '16px'
           }}>
-            <ShieldCheck size={18} style={{ color: 'var(--gold-400)' }} />
-            <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '0.15em', color: 'var(--gold-300)', textTransform: 'uppercase' }}>
-              TRACTION ESCUELA DE NEGOCIOS
+            <ShieldCheck size={18} style={{ color: 'var(--brand-celeste)' }} />
+            <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '0.12em', color: 'var(--brand-celeste)', textTransform: 'uppercase' }}>
+              COMUNIDAD DEL INTERCAMBIO
             </span>
           </div>
 
-          <h2 style={{ fontSize: '24px', fontWeight: 400, color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 500, color: 'var(--text-muted)', letterSpacing: '0.02em' }}>
             Por cuanto se certifica que
           </h2>
 
-          <div style={{ fontSize: '32px', fontWeight: 800, color: '#FFFFFF', margin: '12px 0 6px', letterSpacing: '-0.01em' }}>
+          <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-main)', margin: '10px 0 4px', letterSpacing: '-0.01em' }}>
             {certificateData.recipient}
           </div>
 
-          <div style={{ fontSize: '14px', color: 'var(--emerald-400)', fontWeight: 600 }}>
+          <div style={{ fontSize: '14px', color: 'var(--brand-celeste)', fontWeight: 600 }}>
             {certificateData.company}
           </div>
         </div>
 
         {/* Cuerpo del Diploma */}
-        <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 36px' }}>
-          <p style={{ fontSize: '15px', color: 'var(--text-muted)', lineHeight: '1.6' }}>
+        <div style={{ textAlign: 'center', maxWidth: '680px', margin: '0 auto 32px' }}>
+          <p style={{ fontSize: '14.5px', color: 'var(--text-muted)', lineHeight: '1.6' }}>
             Ha completado satisfactoriamente los requisitos curriculares, evaluaciones prácticas y defensa de modelo comercial del programa:
           </p>
-          <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--gold-300)', marginTop: '12px', lineHeight: '1.4' }}>
+          <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-main)', marginTop: '10px', lineHeight: '1.4' }}>
             {certificateData.courseTitle}
           </div>
           <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '8px' }}>
-            {certificateData.hours} • Calificación: {certificateData.grade}
+            {certificateData.hours} • Calificación: <strong>{certificateData.grade}</strong>
           </div>
         </div>
 
@@ -103,40 +90,40 @@ export function CertificatesView({ user }) {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-end',
-          paddingTop: '30px',
-          borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+          paddingTop: '28px',
+          borderTop: '1px solid var(--border-subtle)',
           flexWrap: 'wrap',
-          gap: '24px'
+          gap: '20px'
         }}>
           <div>
-            <div style={{ fontSize: '14px', fontWeight: 700, color: '#FFFFFF' }}>{certificateData.mentor}</div>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>{certificateData.mentor}</div>
             <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>Mentor Líder del Programa</div>
           </div>
 
-          {/* Sello Dorado Central */}
+          {/* Sello Corporativo Central */}
           <div style={{ textAlign: 'center' }}>
             <div style={{
-              width: '64px',
-              height: '64px',
+              width: '56px',
+              height: '56px',
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #F59E0B, #B45309)',
+              backgroundColor: 'var(--brand-celeste)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#1E1000',
-              boxShadow: 'var(--glow-gold)',
+              color: '#FFFFFF',
+              boxShadow: 'var(--shadow-sm)',
               margin: '0 auto 6px'
             }}>
-              <Award size={32} />
+              <Award size={28} />
             </div>
-            <div style={{ fontSize: '10px', color: 'var(--gold-400)', fontWeight: 800, letterSpacing: '0.1em' }}>
+            <div style={{ fontSize: '10px', color: 'var(--brand-celeste)', fontWeight: 800, letterSpacing: '0.08em' }}>
               SELLO DE EXCELENCIA
             </div>
           </div>
 
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>ID de Verificación Oficial:</div>
-            <div style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--emerald-400)', fontWeight: 700 }}>
+            <div style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--brand-celeste)', fontWeight: 700 }}>
               {certificateData.id}
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>{certificateData.issueDate}</div>
@@ -152,7 +139,7 @@ export function CertificatesView({ user }) {
           style={{ gap: '8px' }}
         >
           <Download size={16} />
-          <span>Descargar Diploma Oficial (PDF Alta Resolución)</span>
+          <span>Descargar Diploma Oficial (PDF)</span>
         </button>
 
         <button 
@@ -167,3 +154,5 @@ export function CertificatesView({ user }) {
     </div>
   );
 }
+
+export default CertificatesView;
