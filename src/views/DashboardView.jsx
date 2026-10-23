@@ -1,491 +1,422 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Play, Radio, Clock, Award, BookOpen, ArrowRight, 
-  Sparkles, TrendingUp, CheckCircle2, Download, Users, 
-  Calendar, Flame, ChevronRight, FileSpreadsheet, FileText 
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  ArrowRight,
+  Bell,
+  BookOpen,
+  CalendarDays,
+  CheckCircle2,
+  Clock3,
+  GraduationCap,
+  Megaphone,
+  Play,
+  Radio,
+  Sparkles,
+  UserRound,
 } from 'lucide-react';
 
-export function DashboardView({ 
-  user, 
-  courses, 
-  liveClasses, 
-  onSelectCourse, 
-  onSelectLesson, 
-  onOpenLiveSession, 
-  onNavigate 
+const dateFormatter = new Intl.DateTimeFormat('es-EC', {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
+const announcementDateFormatter = new Intl.DateTimeFormat('es-EC', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+});
+
+function getCountdown(scheduledAt, currentTime) {
+  const target = new Date(scheduledAt).getTime();
+  const difference = target - currentTime;
+  if (!Number.isFinite(target) || difference <= 0) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+  }
+
+  return {
+    days: Math.floor(difference / 86_400_000),
+    hours: Math.floor((difference % 86_400_000) / 3_600_000),
+    minutes: Math.floor((difference % 3_600_000) / 60_000),
+    seconds: Math.floor((difference % 60_000) / 1_000),
+  };
+}
+
+function MetricCard({ icon: Icon, value, label, accent = 'var(--brand-celeste)' }) {
+  return (
+    <div className="stat-card" style={{ minWidth: '170px', flex: '1 1 170px' }}>
+      <div className="stat-icon-wrapper" style={{ color: accent }}>
+        <Icon size={20} />
+      </div>
+      <div>
+        <div className="stat-value">{value}</div>
+        <div className="stat-label">{label}</div>
+      </div>
+    </div>
+  );
+}
+
+function EmptyState({ icon: Icon, title, description }) {
+  return (
+    <div
+      style={{
+        padding: '34px 22px',
+        border: '1px dashed var(--border-medium)',
+        borderRadius: 'var(--radius-md)',
+        textAlign: 'center',
+        color: 'var(--text-muted)',
+      }}
+    >
+      <Icon size={28} style={{ marginBottom: '10px', color: 'var(--brand-celeste)' }} />
+      <div style={{ color: 'var(--text-main)', fontWeight: 700, marginBottom: '4px' }}>{title}</div>
+      <div style={{ fontSize: '13px', lineHeight: 1.5 }}>{description}</div>
+    </div>
+  );
+}
+
+export function DashboardView({
+  user,
+  courses,
+  liveClasses,
+  announcements = [],
+  onSelectCourse,
+  onOpenLiveSession,
+  onNavigate,
 }) {
-  // Countdown timer for today's live session
-  const [timeLeft, setTimeLeft] = useState({ hours: 2, minutes: 44, seconds: 18 });
+  const upcomingClasses = useMemo(() => {
+    return [...liveClasses]
+      .filter((liveClass) => liveClass.effectiveStatus !== 'ended')
+      .sort((left, right) => {
+        const leftDate = new Date(left.scheduledAt || left.createdAt).getTime();
+        const rightDate = new Date(right.scheduledAt || right.createdAt).getTime();
+        return leftDate - rightDate;
+      });
+  }, [liveClasses]);
+  const featuredLive = upcomingClasses[0];
+  const featuredStatus = featuredLive?.effectiveStatus;
+  const featuredScheduledAt = featuredLive?.scheduledAt;
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+  const countdown = getCountdown(featuredScheduledAt, currentTime);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-        if (prev.minutes > 0) return { ...prev, minutes: 59, seconds: 59 };
-        if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        return prev;
-      });
+    if (!featuredScheduledAt || featuredStatus === 'live') return undefined;
+    const timer = window.setInterval(() => {
+      setCurrentTime(Date.now());
     }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+    return () => window.clearInterval(timer);
+  }, [featuredScheduledAt, featuredStatus]);
 
-  const featuredLive = liveClasses[0];
-  const activeCourse = courses[0]; // Active course with progress
+  const activeCourse = courses.find((course) => (
+    course.totalLessonsCount > 0 && course.progressPercent > 0 && course.progressPercent < 100
+  )) || courses.find((course) => course.totalLessonsCount > 0);
+  const nextLesson = activeCourse?.modules
+    .flatMap((courseModule) => courseModule.lessons)
+    .find((lesson) => !lesson.completed);
+  const firstName = user?.name?.trim().split(/\s+/)[0] || 'estudiante';
+  const stats = user?.stats || {};
+  const hoursWatched = Number(stats.totalHoursWatched || 0);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-      {/* Saludo y Métricas de Alto Impacto */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        flexWrap: 'wrap',
-        gap: '20px'
-      }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <span className="badge badge-emerald">
-              <Sparkles size={13} />
-              <span>Plataforma Ejecutiva</span>
-            </span>
-            <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-              Periodo Q4 • Enfoque en Escala
-            </span>
-          </div>
-          <h1 style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-main)' }}>
-            Hola, {user.name.split(' ')[0]} 👋
+      <section
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          flexWrap: 'wrap',
+          gap: '20px',
+        }}
+      >
+        <div style={{ maxWidth: '620px' }}>
+          <span className="badge badge-emerald" style={{ marginBottom: '10px' }}>
+            <Sparkles size={13} />
+            <span>Panel del estudiante</span>
+          </span>
+          <h1 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.025em', color: 'var(--text-main)' }}>
+            Hola, {firstName} 👋
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '15px', marginTop: '4px' }}>
-            Tu hoja de ruta para acelerar <strong style={{ color: 'var(--text-main)' }}>ScaleTech</strong> esta semana.
+          <p style={{ color: 'var(--text-muted)', fontSize: '15px', marginTop: '6px', lineHeight: 1.6 }}>
+            Consulta tus cursos, retoma tu aprendizaje y revisa lo próximo en tu agenda.
           </p>
         </div>
 
-        {/* Tarjetas de Métricas Ejecutivas */}
-        <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
-          <div className="stat-card">
-            <div className="stat-icon-wrapper">
-              <BookOpen size={20} />
-            </div>
-            <div>
-              <div className="stat-value">{user.stats.coursesInProgress}</div>
-              <div className="stat-label">Cursos en Curso</div>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon-wrapper" style={{ backgroundColor: 'var(--bg-surface-elevated)', color: 'var(--brand-celeste)', borderColor: 'var(--border-subtle)' }}>
-              <CheckCircle2 size={20} />
-            </div>
-            <div>
-              <div className="stat-value">{user.stats.completedLessons}</div>
-              <div className="stat-label">Lecciones Superadas</div>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon-wrapper">
-              <Clock size={20} />
-            </div>
-            <div>
-              <div className="stat-value">{user.stats.totalHoursWatched}h</div>
-              <div className="stat-label">Horas Invertidas</div>
-            </div>
-          </div>
+        <div style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '7px' }}>
+          <CheckCircle2 size={15} style={{ color: 'var(--brand-celeste)' }} />
+          Progreso sincronizado con tu cuenta
         </div>
-      </div>
+      </section>
 
-      {/* Banner Principal: Próxima Clase en Vivo con Contador Regresivo */}
+      <section style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }} aria-label="Resumen del estudiante">
+        <MetricCard icon={BookOpen} value={stats.enrolledCourses ?? courses.length} label="Cursos inscritos" />
+        <MetricCard icon={CheckCircle2} value={stats.completedLessons ?? 0} label="Lecciones completadas" />
+        <MetricCard icon={GraduationCap} value={`${stats.averageProgress ?? 0}%`} label="Progreso promedio" />
+        <MetricCard icon={Clock3} value={`${hoursWatched.toLocaleString('es-EC')} h`} label="Tiempo completado" />
+      </section>
+
       {featuredLive && (
-        <div className="live-banner">
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '24px',
-            alignItems: 'center'
-          }}>
+        <section className="live-banner" aria-labelledby="next-class-title">
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '24px',
+              alignItems: 'center',
+            }}
+          >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                <span className="badge badge-live">
-                  <Radio size={14} />
-                  <span>EN VIVO HOY</span>
-                </span>
-                <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                  {featuredLive.time} • Sala Privada
-                </span>
-              </div>
-
-              <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-main)', lineHeight: '1.3' }}>
+              <span className="badge badge-live" style={{ marginBottom: '12px' }}>
+                <Radio size={14} />
+                <span>{featuredLive.effectiveStatus === 'live' ? 'EN VIVO AHORA' : 'PRÓXIMA CLASE'}</span>
+              </span>
+              <h2 id="next-class-title" style={{ fontSize: '23px', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.3 }}>
                 {featuredLive.title}
               </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '8px', lineHeight: '1.5' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '8px' }}>
                 {featuredLive.subtitle}
               </p>
-
-              {/* Mentor y Alumnos Registrados */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <img 
-                    src={featuredLive.mentorAvatar} 
-                    alt={featuredLive.mentorName} 
-                    style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid var(--brand-celeste)' }} 
-                  />
-                  <div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>{featuredLive.mentorName}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--brand-celeste)', fontWeight: 600 }}>Head of Sales B2B</div>
-                  </div>
-                </div>
-
-                <div style={{ height: '24px', width: '1px', background: 'var(--border-subtle)' }} />
-
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                  <Users size={14} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
-                  <strong>142 alumnos</strong> confirmados
-                </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px', color: 'var(--text-main)', fontSize: '13px', fontWeight: 650 }}>
+                <CalendarDays size={16} style={{ color: 'var(--brand-celeste)' }} />
+                {Number.isNaN(new Date(featuredLive.scheduledAt).getTime())
+                  ? 'Fecha por confirmar'
+                  : dateFormatter.format(new Date(featuredLive.scheduledAt))}
+                <span style={{ color: 'var(--text-dim)' }}>• {featuredLive.duration}</span>
               </div>
             </div>
 
-            {/* Contador y Botones de Acción */}
-            <div style={{
-              backgroundColor: 'var(--bg-surface-elevated)',
-              border: '1px solid var(--border-medium)',
-              borderRadius: 'var(--radius-md)',
-              padding: '24px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px',
-              alignItems: 'center',
-              textAlign: 'center'
-            }}>
-              <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-dim)', fontWeight: 700 }}>
-                La sesión comienza en
-              </span>
-
-              {/* Ticking Numbers */}
-              <div style={{ display: 'flex', gap: '14px' }}>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-main)', fontVariantNumeric: 'tabular-nums' }}>
-                    {String(timeLeft.hours).padStart(2, '0')}
-                  </div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 600 }}>Horas</div>
+            <div
+              style={{
+                padding: '22px',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-medium)',
+                background: 'var(--bg-surface-elevated)',
+              }}
+            >
+              {featuredLive.effectiveStatus === 'live' ? (
+                <div style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 800, color: 'var(--brand-celeste)' }}>
+                  La sala ya está abierta
                 </div>
-                <div style={{ fontSize: '28px', color: 'var(--brand-celeste)', fontWeight: 800 }}>:</div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-main)', fontVariantNumeric: 'tabular-nums' }}>
-                    {String(timeLeft.minutes).padStart(2, '0')}
-                  </div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 600 }}>Min</div>
+              ) : (
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '18px' }}>
+                  {[
+                    ['Días', countdown.days],
+                    ['Horas', countdown.hours],
+                    ['Min', countdown.minutes],
+                    ['Seg', countdown.seconds],
+                  ].map(([label, value]) => (
+                    <div key={label} style={{ flex: 1, minWidth: 50, textAlign: 'center' }}>
+                      <div style={{ fontSize: '25px', fontWeight: 800, color: 'var(--text-main)', fontVariantNumeric: 'tabular-nums' }}>
+                        {String(value).padStart(2, '0')}
+                      </div>
+                      <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>{label}</div>
+                    </div>
+                  ))}
                 </div>
-                <div style={{ fontSize: '28px', color: 'var(--brand-celeste)', fontWeight: 800 }}>:</div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--brand-celeste)', fontVariantNumeric: 'tabular-nums' }}>
-                    {String(timeLeft.seconds).padStart(2, '0')}
-                  </div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 600 }}>Seg</div>
-                </div>
-              </div>
-
-              {/* Botón para entrar a la sala */}
-              <button 
-                className="btn btn-primary"
-                style={{ width: '100%', padding: '12px 20px', fontSize: '14px' }}
-                onClick={() => onOpenLiveSession(featuredLive)}
-              >
+              )}
+              <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => onOpenLiveSession(featuredLive)}>
                 <Radio size={16} />
-                <span>Entrar a la Sala en Vivo</span>
-              </button>
-
-              <button 
-                className="btn btn-secondary btn-sm"
-                style={{ width: '100%', fontSize: '12px' }}
-                onClick={() => onNavigate('live')}
-              >
-                Ver Agenda Completa y Materiales
+                <span>{featuredLive.effectiveStatus === 'live' ? 'Entrar a la clase' : 'Ver detalles de la clase'}</span>
               </button>
             </div>
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Sección Continuar Aprendiendo (Resume Card - Sólida sin degradados) */}
       {activeCourse && (
-        <div className="card" style={{
-          backgroundColor: 'var(--bg-surface)',
-          borderColor: 'var(--brand-celeste-border)',
-          borderLeft: '4px solid var(--brand-celeste)',
-          padding: '24px 28px'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Flame size={18} style={{ color: 'var(--brand-celeste)' }} />
-              <span style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
-                Continuar donde te quedaste
-              </span>
-            </div>
-            <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--brand-celeste)' }}>
-              {activeCourse.progressPercent}% Completado
-            </span>
-          </div>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: '24px',
-            alignItems: 'center'
-          }}>
-            <div>
-              <div style={{ fontSize: '12px', color: 'var(--brand-celeste)', fontWeight: 600, marginBottom: '4px' }}>
-                {activeCourse.category} • Módulo 3
+        <section
+          className="card"
+          style={{
+            padding: '24px 28px',
+            borderLeft: '4px solid var(--brand-celeste)',
+            borderColor: 'var(--brand-celeste-border)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 360px' }}>
+              <div style={{ color: 'var(--brand-celeste)', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', marginBottom: '7px' }}>
+                Continuar aprendiendo
               </div>
-              <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '6px' }}>
-                {activeCourse.title}
-              </h3>
-              <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
-                Siguiente lección: <strong>3.2 Cómo estructurar una Demo que no aburra (El enfoque de 3 historias)</strong>
+              <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-main)' }}>{activeCourse.title}</h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '5px' }}>
+                {nextLesson ? `Siguiente lección: ${nextLesson.title}` : 'Has completado todas las lecciones publicadas.'}
               </p>
-
-              {/* Barra de progreso */}
-              <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <div className="progress-bar-container" style={{ height: '8px', flex: 1 }}>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginTop: '15px' }}>
+                <div className="progress-bar-container" style={{ flex: 1, height: '8px' }}>
                   <div className="progress-bar-fill" style={{ width: `${activeCourse.progressPercent}%` }} />
                 </div>
-                <span style={{ fontSize: '12px', color: 'var(--text-dim)', whiteSpace: 'nowrap' }}>
-                  {activeCourse.completedLessonsCount} de {activeCourse.totalLessonsCount} lecciones
+                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--brand-celeste)', whiteSpace: 'nowrap' }}>
+                  {activeCourse.progressPercent}%
                 </span>
               </div>
             </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              <button 
-                className="btn btn-primary btn-lg"
-                onClick={() => {
-                  onSelectCourse(activeCourse);
-                  onSelectLesson('les_08');
-                }}
-              >
-                <Play size={18} fill="currentColor" />
-                <span>Reanudar Lección (35 min)</span>
-              </button>
-            </div>
+            <button className="btn btn-primary btn-lg" onClick={() => onSelectCourse(activeCourse)}>
+              <Play size={17} fill="currentColor" />
+              <span>Retomar curso</span>
+            </button>
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Grid: Mis Programas Activos */}
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+      <section aria-labelledby="courses-title">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: '16px', marginBottom: '17px', flexWrap: 'wrap' }}>
           <div>
-            <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-main)' }}>Mis Programas de Negocio</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Formación estructurada por módulos y casos de estudio reales.</p>
+            <h2 id="courses-title" style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-main)' }}>Mis cursos</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '3px' }}>Solo aparecen los cursos asociados a tu matrícula.</p>
           </div>
-          <button 
-            className="btn btn-secondary btn-sm"
-            onClick={() => onNavigate('courses')}
-            style={{ gap: '6px' }}
-          >
-            <span>Explorar catálogo completo</span>
-            <ChevronRight size={14} />
+          <button className="btn btn-secondary btn-sm" onClick={() => onNavigate('courses')}>
+            Ver todos <ArrowRight size={14} />
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
-          {courses.map((course) => (
-            <div 
-              key={course.id}
-              className="card card-interactive"
-              style={{ display: 'flex', flexDirection: 'column' }}
-              onClick={() => onSelectCourse(course)}
-            >
-              {/* Imagen de portada limpia (Sin degradados) */}
-              <div style={{ position: 'relative', height: '170px', borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: '16px', border: '1px solid var(--border-subtle)' }}>
-                <img 
-                  src={course.thumbnail} 
-                  alt={course.title}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                />
-
-                <span className="badge badge-emerald" style={{ position: 'absolute', top: '12px', left: '12px' }}>
-                  {course.category}
-                </span>
-
-                <div style={{
-                  position: 'absolute',
-                  bottom: '10px',
-                  left: '10px',
-                  right: '10px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  backgroundColor: 'rgba(15, 23, 42, 0.85)',
-                  backdropFilter: 'blur(4px)',
-                  padding: '4px 10px',
-                  borderRadius: 'var(--radius-sm)'
-                }}>
-                  <span style={{ fontSize: '12px', color: '#FFFFFF', fontWeight: 600 }}>
-                    {course.estimatedHours}
-                  </span>
-                  <span style={{ fontSize: '12px', color: '#FCD34D', fontWeight: 700 }}>
-                    ★ {course.rating}
-                  </span>
-                </div>
-              </div>
-
-              {/* Información del Curso */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-main)', marginBottom: '8px', lineHeight: '1.3' }}>
-                  {course.title}
-                </h3>
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.4', marginBottom: '16px' }}>
-                  {course.tagline}
-                </p>
-
-                {/* Mentor Info */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: 'auto', marginBottom: '16px' }}>
-                  <img 
-                    src={course.mentorAvatar} 
-                    alt={course.mentorName} 
-                    style={{ width: '28px', height: '28px', borderRadius: '50%', border: '1px solid var(--brand-celeste)' }}
-                  />
-                  <div style={{ fontSize: '12px' }}>
-                    <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>{course.mentorName}</span>
-                    <span style={{ color: 'var(--text-dim)', marginLeft: '6px' }}>• {course.mentorRole}</span>
+        {courses.length ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', gap: '20px' }}>
+            {courses.map((course) => {
+              const hasContent = course.totalLessonsCount > 0;
+              return (
+                <article key={course.id} className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ height: '150px', position: 'relative', overflow: 'hidden' }}>
+                    <img src={course.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <span className="badge badge-emerald" style={{ position: 'absolute', top: '12px', left: '12px' }}>{course.category}</span>
                   </div>
-                </div>
+                  <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                    <h3 style={{ fontSize: '16px', fontWeight: 750, color: 'var(--text-main)', lineHeight: 1.35 }}>{course.title}</h3>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '13px', lineHeight: 1.5, marginTop: '7px' }}>{course.tagline}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '9px', marginTop: '16px' }}>
+                      {course.mentorAvatar ? (
+                        <img src={course.mentorAvatar} alt="" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ width: 30, height: 30, borderRadius: '50%', display: 'grid', placeItems: 'center', background: 'var(--brand-celeste-subtle)', color: 'var(--brand-celeste)' }}>
+                          <UserRound size={15} />
+                        </div>
+                      )}
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: '12px', color: 'var(--text-main)', fontWeight: 650 }}>{course.mentorName}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>{course.mentorRole}</div>
+                      </div>
+                    </div>
+                    <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '13px', marginTop: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', marginBottom: '7px', fontSize: '12px' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>
+                          {hasContent ? `${course.completedLessonsCount} de ${course.totalLessonsCount} lecciones` : 'Contenido por publicar'}
+                        </span>
+                        <span style={{ color: 'var(--brand-celeste)', fontWeight: 700 }}>{course.progressPercent}%</span>
+                      </div>
+                      <div className="progress-bar-container">
+                        <div className="progress-bar-fill" style={{ width: `${course.progressPercent}%` }} />
+                      </div>
+                    </div>
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      disabled={!hasContent}
+                      onClick={() => hasContent && onSelectCourse(course)}
+                      style={{ marginTop: '16px', width: '100%', opacity: hasContent ? 1 : 0.6 }}
+                    >
+                      {hasContent ? 'Abrir curso' : 'Esperando contenido'}
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <EmptyState
+            icon={BookOpen}
+            title="Aún no tienes cursos asignados"
+            description="Cuando el administrador registre tu matrícula, el curso aparecerá aquí automáticamente."
+          />
+        )}
+      </section>
 
-                {/* Progreso */}
-                <div style={{ paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '6px' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>Progreso</span>
-                    <span style={{ color: 'var(--brand-celeste)', fontWeight: 700 }}>{course.progressPercent}%</span>
-                  </div>
-                  <div className="progress-bar-container">
-                    <div className="progress-bar-fill" style={{ width: `${course.progressPercent}%` }} />
-                  </div>
-                </div>
-              </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: '22px' }}>
+        <section className="card" aria-labelledby="schedule-title">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div>
+              <h2 id="schedule-title" style={{ fontSize: '18px', fontWeight: 750, color: 'var(--text-main)' }}>Próximas clases</h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginTop: '3px' }}>Agenda de tus cursos inscritos</p>
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Fila Dividida: Biblioteca Rápida de Herramientas y Replays Recientes */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
-        {/* Herramientas & Plantillas */}
-        <div className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-            <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--text-main)' }}>Plantillas y Modelos Descargables</h3>
-            <button 
-              className="btn btn-secondary btn-sm"
-              onClick={() => onNavigate('library')}
-            >
-              Ver biblioteca
-            </button>
+            <CalendarDays size={20} style={{ color: 'var(--brand-celeste)' }} />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px 14px',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'var(--bg-surface-elevated)',
-              border: '1px solid var(--border-subtle)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--brand-celeste-subtle)', color: 'var(--brand-celeste)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <FileSpreadsheet size={18} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main)' }}>Simulador Financiero Runway 36m</div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>Excel • 3.4 MB • 1,420 descargas</div>
-                </div>
-              </div>
-              <button 
-                className="btn btn-secondary btn-sm" 
-                title="Descargar plantilla"
-                onClick={() => alert('Descargando Simulador Financiero Runway 36m (Excel)...')}
-              >
-                <Download size={14} />
+          {upcomingClasses.length ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {upcomingClasses.slice(0, 4).map((liveClass) => (
+                <button
+                  type="button"
+                  key={liveClass.id}
+                  onClick={() => onOpenLiveSession(liveClass)}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-subtle)',
+                    background: 'var(--bg-surface-elevated)',
+                    color: 'inherit',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div style={{ width: 38, height: 38, borderRadius: 'var(--radius-sm)', display: 'grid', placeItems: 'center', background: 'var(--brand-celeste-subtle)', color: 'var(--brand-celeste)', flexShrink: 0 }}>
+                    {liveClass.effectiveStatus === 'live' ? <Radio size={18} /> : <CalendarDays size={18} />}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ color: 'var(--text-main)', fontSize: '13px', fontWeight: 700 }}>{liveClass.title}</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '11px', marginTop: '3px' }}>
+                      {liveClass.date} • {liveClass.time} • {liveClass.duration}
+                    </div>
+                  </div>
+                  <ArrowRight size={15} style={{ color: 'var(--text-dim)', flexShrink: 0 }} />
+                </button>
+              ))}
+              <button className="btn btn-secondary btn-sm" onClick={() => onNavigate('live')} style={{ marginTop: '4px' }}>
+                Ver agenda completa
               </button>
             </div>
+          ) : (
+            <EmptyState
+              icon={CalendarDays}
+              title="Sin clases programadas"
+              description="Las nuevas sesiones aparecerán aquí cuando sean agendadas."
+            />
+          )}
+        </section>
 
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px 14px',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'var(--bg-surface-elevated)',
-              border: '1px solid var(--border-subtle)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--brand-celeste-subtle)', color: 'var(--brand-celeste)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <FileText size={18} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main)' }}>Playbook de Ventas & Scripts B2B</div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>Notion • Enlace directo • 980 descargas</div>
-                </div>
-              </div>
-              <button 
-                className="btn btn-secondary btn-sm" 
-                title="Descargar playbook"
-                onClick={() => alert('Abriendo Playbook de Ventas en Notion...')}
-              >
-                <Download size={14} />
-              </button>
+        <section className="card" aria-labelledby="news-title">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div>
+              <h2 id="news-title" style={{ fontSize: '18px', fontWeight: 750, color: 'var(--text-main)' }}>Novedades</h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginTop: '3px' }}>Anuncios generales y de tus cursos</p>
             </div>
-          </div>
-        </div>
-
-        {/* Novedades & Networking de Alumnos */}
-        <div className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-            <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--text-main)' }}>Debates en la Comunidad</h3>
-            <button 
-              className="btn btn-secondary btn-sm"
-              onClick={() => onNavigate('community')}
-            >
-              Ir al foro
-            </button>
+            <Bell size={20} style={{ color: 'var(--brand-celeste)' }} />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{
-              padding: '12px 14px',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'var(--bg-surface-elevated)',
-              border: '1px solid var(--border-subtle)'
-            }}>
-              <div style={{ fontSize: '11px', color: 'var(--brand-celeste)', fontWeight: 700, marginBottom: '4px' }}>
-                #VentasB2B • Debate Activo
-              </div>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main)', lineHeight: '1.3' }}>
-                "¿Cómo están estructurando la comisión de su primer SDR en LatAm?"
-              </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '6px' }}>
-                Por Mateo Carvajal • 11 aportes de fundadores
-              </div>
+          {announcements.length ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
+              {announcements.map((announcement) => (
+                <article key={announcement.id} style={{ padding: '13px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', background: 'var(--bg-surface-elevated)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', marginBottom: '6px' }}>
+                    <span style={{ color: 'var(--brand-celeste)', fontSize: '11px', fontWeight: 700 }}>
+                      {announcement.courseTitle || 'Comunidad'}
+                    </span>
+                    <span style={{ color: 'var(--text-dim)', fontSize: '10px', whiteSpace: 'nowrap' }}>
+                      {announcementDateFormatter.format(new Date(announcement.publishedAt))}
+                    </span>
+                  </div>
+                  <h3 style={{ color: 'var(--text-main)', fontSize: '13px', fontWeight: 700, lineHeight: 1.4 }}>{announcement.title}</h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '12px', lineHeight: 1.5, marginTop: '5px' }}>{announcement.body}</p>
+                </article>
+              ))}
             </div>
-
-            <div style={{
-              padding: '12px 14px',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'var(--bg-surface-elevated)',
-              border: '1px solid var(--border-subtle)'
-            }}>
-              <div style={{ fontSize: '11px', color: 'var(--brand-celeste)', fontWeight: 700, marginBottom: '4px' }}>
-                #CasosDeÉxito • Victoria de la semana
-              </div>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main)', lineHeight: '1.3' }}>
-                "Redujimos el ciclo de ventas de 65 a 28 días aplicando el One-Pager"
-              </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '6px' }}>
-                Por Valeria Gómez (COO) • 19 comentarios
-              </div>
-            </div>
-          </div>
-        </div>
+          ) : (
+            <EmptyState
+              icon={Megaphone}
+              title="No hay novedades por ahora"
+              description="Los anuncios publicados en Supabase aparecerán aquí automáticamente."
+            />
+          )}
+        </section>
       </div>
     </div>
   );
